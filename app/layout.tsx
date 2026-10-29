@@ -15,6 +15,10 @@ const sans = Montserrat({
   variable: "--font-sans-loaded",
 });
 
+// Thème sombre selon le réglage du téléphone, appliqué avant l'affichage.
+const THEME_SCRIPT =
+  "try{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){}";
+
 export const metadata: Metadata = {
   icons: { icon: [{ url: "/brand/icone-application.svg", type: "image/svg+xml" }] },
   title: "Keyroom",
@@ -29,7 +33,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${serif.variable} ${sans.variable}`}>
+    <html lang="fr" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );
