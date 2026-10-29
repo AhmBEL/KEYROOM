@@ -33,8 +33,11 @@ export function LoginForm() {
       setError("Trop de demandes. Patientez une minute, puis demandez un nouveau code.");
       return;
     }
-    if (err && (err.status ?? 0) >= 500) {
-      setError("Le code n'a pas pu être envoyé. Vérifiez votre connexion et réessayez.");
+    // Seule une adresse non invitée reçoit la réponse neutre. Toute autre erreur
+    // (réseau, configuration, envoi d'email) est annoncée, pour ne pas attendre un code qui ne viendra pas.
+    const notInvited = err && (err.status === 422 || ["otp_disabled", "signup_disabled", "user_not_found"].includes(err.code ?? ""));
+    if (err && !notInvited) {
+      setError("Le code n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Si cela continue, la configuration de l'envoi d'emails doit être vérifiée.");
       return;
     }
     // Même réponse que l'adresse soit invitée ou non : on ne révèle pas qui a un accès.
