@@ -1,0 +1,145 @@
+:root {
+  --bleu-nuit: #0b1f33;
+  --or-champagne: #c9a96a;
+  --beige-sable: #e8dece;
+  --ivoire: #f7f5ef;
+  --gris-anthracite: #2b2d32;
+
+  --surface: #f7f5ef;
+  --surface-raised: #ffffff;
+  --surface-sand: #e8dece;
+  --panel-deep: #0b1f33;
+  --on-panel: #f7f5ef;
+
+  --ink: #0b1f33;
+  --text: #2b2d32;
+  --text-muted: #5a6470;
+
+  --accent: #c9a96a;
+  --accent-text: #8a6a2f;
+
+  --line: #d9cfbd;
+  --line-strong: #8c8576;
+
+  --action: #0b1f33;
+  --on-action: #f7f5ef;
+  --focus: #0b1f33;
+
+  --success: #1f6b3b;
+  --warning: #8a5a00;
+  --danger: #a4262c;
+
+  --shadow-card: 0 1px 2px rgba(11, 31, 51, 0.06), 0 12px 32px rgba(11, 31, 51, 0.08);
+
+  --radius-sm: 2px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-arch: 999px;
+  --radius-app: 22%;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  --font-serif: var(--font-serif-loaded), "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-sans-loaded), "Montserrat", "Helvetica Neue", Arial, sans-serif;
+}
+
+[data-theme="dark"] {
+  --surface: #0b1f33;
+  --surface-raised: #102a44;
+  --surface-sand: #16334f;
+  --panel-deep: #1b4268;
+  --on-panel: #f7f5ef;
+  --ink: #f7f5ef;
+  --text: #e8dece;
+  --text-muted: #a9b4c0;
+  --accent: #c9a96a;
+  --accent-text: #c9a96a;
+  --line: #27425c;
+  --line-strong: #6f8399;
+  --action: #c9a96a;
+  --on-action: #0b1f33;
+  --focus: #c9a96a;
+  --success: #6fcf97;
+  --warning: #e6b450;
+  --danger: #ff8a8f;
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 26px;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.kr-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4);
+}
+
+.kr-eyebrow {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--accent-text);
+  margin: 0 0 var(--space-4);
+}
+
+.kr-title-1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 30px;
+  line-height: 38px;
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+}
+
+.kr-body-lg {
+  font-size: 18px;
+  line-height: 30px;
+  margin: 0;
+}
+
+@media (min-width: 720px) {
+  .kr-title-1 {
+    font-size: 40px;
+    line-height: 48px;
+  }
+}
