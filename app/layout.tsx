@@ -16,6 +16,7 @@ const sans = Montserrat({
 });
 
 export const metadata: Metadata = {
+  icons: { icon: [{ url: "/brand/icone-application.svg", type: "image/svg+xml" }] },
   title: "Keyroom",
   description: "Hotels open new opportunities.",
 };
