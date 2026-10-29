@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { SignOutButton } from "@/components/SignOutButton";
 import { requireAdmin } from "@/lib/session";
@@ -28,6 +29,7 @@ export default async function AdminPage() {
       {deals?.length ? deals.map((d) => (
         <section key={d.id} className="kr-card">
           <p className="kr-card__ref">{d.reference}</p>
+          <Link href={`/admin/dossiers/${d.id}`} className="kr-link">Ouvrir le dossier</Link>
           {(members ?? []).filter((m) => m.deal_id === d.id).map((m) => (
             <p key={m.user_id} className="kr-small">{ROLE_LABEL[m.role]} : {name.get(m.user_id)}</p>
           ))}

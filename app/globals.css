@@ -194,3 +194,58 @@ body {
 
 .kr-card { display: grid; gap: var(--space-3); padding: var(--space-5); margin-bottom: var(--space-4); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-sm); box-shadow: var(--shadow-card); }
 .kr-card__ref { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-text); }
+
+/* ---- Étapes (charte §5.5) ---- */
+.kr-steps { list-style: none; margin: 0 0 var(--space-6); padding: 0; }
+.kr-step { position: relative; display: grid; grid-template-columns: 36px 1fr; gap: var(--space-4); padding-bottom: var(--space-5); }
+.kr-step:last-child { padding-bottom: 0; }
+.kr-step:not(:last-child)::before { content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; width: 1px; background: var(--line-strong); }
+.kr-step__dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font-size: 14px; font-weight: 600; background: var(--surface); border: 1px solid var(--line-strong); color: var(--text-muted); }
+.kr-step__title { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--text); padding-top: 6px; }
+.kr-step__state { margin: 0; font-size: 12px; line-height: 18px; color: var(--text-muted); }
+.kr-step__note { margin: var(--space-2) 0 0; font-size: 14px; line-height: 22px; color: var(--text); }
+.kr-step--done .kr-step__dot { background: var(--action); border-color: var(--action); color: var(--on-action); }
+.kr-step--current .kr-step__dot { background: var(--accent); border-color: var(--accent); color: #0b1f33; box-shadow: 0 0 0 4px var(--surface-sand); }
+.kr-step--current .kr-step__title { font-size: 18px; line-height: 28px; font-weight: 600; color: var(--ink); padding-top: 4px; }
+.kr-step--upcoming .kr-step__title { color: var(--text-muted); }
+
+/* ---- À faire maintenant ---- */
+.kr-todo { display: grid; gap: var(--space-3); padding: var(--space-5); margin: var(--space-5) 0; background: var(--surface-sand); border-radius: var(--radius-sm); }
+.kr-todo .kr-eyebrow, .kr-todo .kr-body { margin: 0; }
+.kr-todo .kr-eyebrow { color: var(--ink); }
+.kr-ref-line { margin-bottom: var(--space-2); }
+.kr-footer-actions { margin-top: var(--space-7); }
+
+/* ---- Questionnaire (charte §5.3) ---- */
+.kr-progress { height: 4px; background: var(--line); border-radius: 0; position: sticky; top: 0; z-index: 2; }
+.kr-progress__bar { height: 100%; background: var(--accent); transition: width .2s; }
+.kr-progress__text { margin: var(--space-2) 0 var(--space-5); }
+.kr-qblock { display: grid; gap: var(--space-5); margin-bottom: var(--space-6); }
+.kr-qblock .kr-title-3, .kr-qblock .kr-small { margin: 0; }
+.kr-fieldset { border: 0; margin: 0; padding: 0; min-inline-size: 0; display: grid; gap: var(--space-2); }
+.kr-fieldset legend { padding: 0; margin-bottom: var(--space-2); font-size: 14px; line-height: 20px; font-weight: 500; color: var(--ink); }
+.kr-req { font-weight: 400; color: var(--text-muted); }
+.kr-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.kr-chip { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 8px 16px; font-size: 15px; line-height: 20px; background: var(--surface-raised); color: var(--text); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); cursor: pointer; }
+.kr-chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.kr-chip:hover { border-color: var(--ink); }
+.kr-chip:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: var(--surface-sand); color: var(--ink); font-weight: 600; }
+.kr-chip:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; }
+.kr-textarea { resize: vertical; min-height: 120px; }
+.kr-sticky { position: sticky; bottom: 0; padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); margin-top: var(--space-5); }
+.kr-page--has-sticky { padding-bottom: var(--space-4); }
+.kr-file { padding: 10px 14px; }
+
+/* ---- Récapitulatif, journal, détails ---- */
+.kr-dl { margin: 0; display: grid; gap: var(--space-3); }
+.kr-dl dt { font-size: 12px; line-height: 18px; color: var(--text-muted); }
+.kr-dl dd { margin: 0; font-size: 16px; line-height: 24px; color: var(--ink); }
+.kr-details { margin-bottom: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface-raised); }
+.kr-details summary { min-height: 44px; padding: var(--space-3) var(--space-4); cursor: pointer; font-weight: 500; color: var(--ink); }
+.kr-details > :not(summary) { padding: 0 var(--space-4) var(--space-4); }
+.kr-log { list-style: none; margin: 0 0 var(--space-6); padding: 0; display: grid; gap: var(--space-3); }
+.kr-log li { display: grid; gap: 2px; padding-bottom: var(--space-3); border-bottom: 1px solid var(--line); }
+.kr-log li > span:first-child { font-weight: 500; color: var(--ink); }
+.kr-action { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.kr-card .kr-action { margin-bottom: 0; }
+.kr-card .kr-btn { width: 100%; }
