@@ -48,8 +48,8 @@ export function LoginForm() {
   async function verify(e: React.FormEvent) {
     e.preventDefault();
     const token = code.replace(/\s/g, "");
-    if (!/^\d{6}$/.test(token)) {
-      setError("Le code contient 6 chiffres. Vérifiez votre email.");
+    if (!/^\d{6,10}$/.test(token)) {
+      setError("Le code ne contient que des chiffres. Recopiez-le tel qu'il figure dans votre email.");
       return;
     }
     setBusy(true);
@@ -86,15 +86,15 @@ export function LoginForm() {
   return (
     <form onSubmit={verify} noValidate className="kr-form">
       <p className="kr-body">
-        Si <strong>{email}</strong> est invitée, un code à 6 chiffres vient d&rsquo;être envoyé. Il est valable peu de temps.
+        Si <strong>{email}</strong> est invitée, un code vient d&rsquo;être envoyé. Il est valable peu de temps.
       </p>
       <div className="kr-field">
         <label htmlFor="code">Code reçu par email</label>
         <input id="code" name="code" type="text" inputMode="numeric" autoComplete="one-time-code"
-          maxLength={6} pattern="[0-9]*" className="kr-input kr-input--code" value={code}
+          maxLength={10} pattern="[0-9]*" className="kr-input kr-input--code" value={code}
           onChange={(e) => setCode(e.target.value)} aria-invalid={error ? true : undefined}
           aria-describedby="code-hint" required autoFocus />
-        <p id="code-hint" className="kr-hint">6 chiffres. Pensez à vérifier vos courriers indésirables.</p>
+        <p id="code-hint" className="kr-hint">Chiffres uniquement. Pensez à vérifier vos courriers indésirables.</p>
         {error && <p className="kr-error" role="alert">{error}</p>}
       </div>
       <button type="submit" className="kr-btn kr-btn--primary" disabled={busy}>
