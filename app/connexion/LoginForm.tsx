@@ -13,6 +13,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function sendCode(e?: React.FormEvent) {
@@ -24,6 +25,7 @@ export function LoginForm() {
     }
     setBusy(true);
     setError(null);
+    setDetail(null);
     const { error: err } = await createClient().auth.signInWithOtp({
       email: value,
       options: { shouldCreateUser: false },
@@ -37,6 +39,7 @@ export function LoginForm() {
     // (réseau, configuration, envoi d'email) est annoncée, pour ne pas attendre un code qui ne viendra pas.
     const notInvited = err && (err.status === 422 || ["otp_disabled", "signup_disabled", "user_not_found"].includes(err.code ?? ""));
     if (err && !notInvited) {
+      setDetail(`${err.status ?? "réseau"} ${err.code ?? err.name}`);
       setError("Le code n'a pas pu être envoyé. Vérifiez votre connexion et réessayez. Si cela continue, la configuration de l'envoi d'emails doit être vérifiée.");
       return;
     }
@@ -75,6 +78,7 @@ export function LoginForm() {
             aria-invalid={error ? true : undefined} aria-describedby="email-hint" required />
           <p id="email-hint" className="kr-hint">Utilisez l&rsquo;adresse à laquelle vous avez été invité.</p>
           {error && <p className="kr-error" role="alert">{error}</p>}
+          {error && detail && <p className="kr-hint">Détail technique : {detail}</p>}
         </div>
         <button type="submit" className="kr-btn kr-btn--primary" disabled={busy}>
           {busy ? "Envoi…" : "Recevoir un code"}
