@@ -1,16 +1,30 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { blocksFor, isVisible, progress, type Answers, type Question, type Role } from "@/lib/questionnaire";
-import { submitQuestionnaire } from "./actions";
+import { UI, tx, type Lang } from "@/lib/i18n";
 
-export function QuestionnaireForm({ role }: { role: Role }) {
+export type SubmitResult = { ok: boolean; message?: string; errors?: Record<string, string> };
+export type SubmitMeta = { hp: string; elapsed: number };
+
+// Même formulaire pour l'espace connecté (français) et pour les liens publics (français ou anglais).
+export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, successNode }: {
+  role: Role;
+  lang?: Lang;
+  submit: (answers: Answers, meta: SubmitMeta) => Promise<SubmitResult>;
+  submitLabel?: string;
+  successNode?: React.ReactNode;
+}) {
   const router = useRouter();
+  const t = UI[lang];
   const blocks = useMemo(() => blocksFor(role), [role]);
+  const startedAt = useRef(Date.now());
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [hp, setHp] = useState("");
+  const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
   const { done, total } = progress(role, answers);
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -24,34 +38,49 @@ export function QuestionnaireForm({ role }: { role: Role }) {
     set(q.id, cur.includes(option) ? cur.filter((o) => o !== option) : [...cur, option]);
   };
 
-  function submit(e: React.FormEvent) {
+  function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
     start(async () => {
-      const res = await submitQuestionnaire(answers);
-      if (res.ok) { router.refresh(); window.scrollTo({ top: 0 }); return; }
+      let res: SubmitResult;
+      try {
+        res = await submit(answers, { hp, elapsed: Date.now() - startedAt.current });
+      } catch {
+        res = { ok: false, message: t.fail };
+      }
+      if (res.ok) {
+        if (successNode) { setSent(true); window.scrollTo({ top: 0 }); return; }
+        router.refresh(); window.scrollTo({ top: 0 }); return;
+      }
       setErrors(res.errors ?? {});
-      setMessage(res.message ?? "L'envoi a échoué. Réessayez.");
+      setMessage(res.message ?? t.fail);
       const first = res.errors && Object.keys(res.errors)[0];
       if (first) document.getElementById(`q-${first}`)?.scrollIntoView({ block: "center" });
     });
   }
 
+  if (sent && successNode) return <>{successNode}</>;
+
   return (
-    <form onSubmit={submit} noValidate>
-      <div className="kr-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}
-        aria-label="Progression du questionnaire">
+    <form onSubmit={onSubmit} noValidate lang={lang}>
+      <div className="kr-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label={t.progressLabel}>
         <div className="kr-progress__bar" style={{ width: `${pct}%` }} />
       </div>
-      <p className="kr-small kr-progress__text">{done} réponse{done > 1 ? "s" : ""} obligatoire{done > 1 ? "s" : ""} sur {total}</p>
+      <p className="kr-small kr-progress__text">{t.progress(done, total)}</p>
+
+      {/* Piège à robots : invisible pour une personne, rempli par les scripts. */}
+      <div className="kr-hp" aria-hidden="true">
+        <label>Website<input type="text" name="company_website" tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} /></label>
+      </div>
 
       {blocks.map((b) => (
         <section key={b.id} className="kr-qblock" aria-labelledby={`b-${b.id}`}>
-          <h2 id={`b-${b.id}`} className="kr-title-3">{b.title}</h2>
-          {b.intro && <p className="kr-small">{b.intro}</p>}
+          <h2 id={`b-${b.id}`} className="kr-title-3">{tx(lang, b.title)}</h2>
+          {b.intro && <p className="kr-small">{tx(lang, b.intro)}</p>}
           {b.questions.filter((q) => isVisible(q, answers)).map((q) => {
             const err = errors[q.id];
-            const label = <>{q.label}{q.required && <span className="kr-req"> (obligatoire)</span>}</>;
+            const label = <>{tx(lang, q.label)}{q.required && <span className="kr-req"> {t.required}</span>}</>;
+            const hint = q.hint ? tx(lang, q.hint) : null;
             if (q.type === "text" || q.type === "longtext") {
               return (
                 <div key={q.id} id={`q-${q.id}`} className="kr-field">
@@ -64,7 +93,7 @@ export function QuestionnaireForm({ role }: { role: Role }) {
                         autoComplete={q.id === "email" ? "email" : q.id === "telephone" ? "tel" : "off"} maxLength={500}
                         value={(answers[q.id] as string) ?? ""} onChange={(e) => set(q.id, e.target.value)}
                         aria-invalid={err ? true : undefined} />}
-                  {q.hint && <p className="kr-hint">{q.hint}</p>}
+                  {hint && <p className="kr-hint">{hint}</p>}
                   {err && <p className="kr-error" role="alert">{err}</p>}
                 </div>
               );
@@ -73,7 +102,7 @@ export function QuestionnaireForm({ role }: { role: Role }) {
             return (
               <fieldset key={q.id} id={`q-${q.id}`} className="kr-fieldset">
                 <legend>{label}</legend>
-                {multi && <p className="kr-hint">Plusieurs choix possibles.</p>}
+                {multi && <p className="kr-hint">{t.multi}</p>}
                 <div className="kr-chips">
                   {q.options.map((o) => {
                     const checked = multi ? ((answers[q.id] as string[] | undefined) ?? []).includes(o) : answers[q.id] === o;
@@ -81,7 +110,7 @@ export function QuestionnaireForm({ role }: { role: Role }) {
                       <label key={o} className="kr-chip">
                         <input type={multi ? "checkbox" : "radio"} name={q.id} checked={checked}
                           onChange={() => (multi ? toggle(q as Question & { type: "multi" }, o) : set(q.id, o))} />
-                        <span>{o}</span>
+                        <span>{tx(lang, o)}</span>
                       </label>
                     );
                   })}
@@ -96,7 +125,7 @@ export function QuestionnaireForm({ role }: { role: Role }) {
       {message && <p className="kr-error" role="alert">{message}</p>}
       <div className="kr-sticky">
         <button type="submit" className="kr-btn kr-btn--primary" disabled={pending}>
-          {pending ? "Envoi…" : "Valider mes réponses"}
+          {pending ? t.sending : submitLabel ?? t.submit}
         </button>
       </div>
     </form>

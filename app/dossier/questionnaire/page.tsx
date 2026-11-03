@@ -5,7 +5,8 @@ import { Recap } from "@/components/Recap";
 import { getSession } from "@/lib/session";
 import { getMyDeal } from "@/lib/deal";
 import type { Answers } from "@/lib/questionnaire";
-import { QuestionnaireForm } from "./QuestionnaireForm";
+import { QuestionnaireForm } from "@/components/QuestionnaireForm";
+import { submitQuestionnaire } from "./actions";
 
 export const metadata = { title: "Questionnaire — Keyroom" };
 
@@ -34,7 +35,7 @@ export default async function QuestionnairePage() {
         <>
           <h1 className="kr-title-2">Questionnaire de cadrage</h1>
           <p className="kr-body">Remplissez-le en une fois. Aucune coordonnée bancaire, aucun nom d&rsquo;hôtel ou d&rsquo;investisseur, aucun chiffre confidentiel à ce stade.</p>
-          <QuestionnaireForm role={mine.role} />
+          <QuestionnaireForm role={mine.role} submit={submitQuestionnaire} submitLabel="Valider mes réponses" />
         </>
       )}
     </main>

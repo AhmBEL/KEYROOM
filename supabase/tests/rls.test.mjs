@@ -91,7 +91,7 @@ async function withTx(fn) {
 
 const PERMISSION_OR_RLS = "42501";
 const TABLES = ["profiles", "deals", "deal_members", "deal_steps", "deal_settings",
-  "questionnaire_responses", "documents", "audit_log"];
+  "questionnaire_responses", "documents", "audit_log", "form_submissions"];
 
 test("RLS est activée sur toutes les tables de public", async () => {
   const rows = (await root.query(
@@ -263,6 +263,21 @@ test("référence au format KR-AAAA-NNNN, unique ; create_deal réservé au serv
     assert.equal(await tx.fails("select public.create_deal($1)", [ids.admin]), PERMISSION_OR_RLS);
     await tx.as(null);
     assert.equal(await tx.fails("select public.create_deal($1)", [ids.admin]), PERMISSION_OR_RLS);
+  });
+});
+
+test("formulaires publics : écriture réservée au serveur, lecture réservée à l'admin", async () => {
+  await root.query("insert into public.form_submissions (form, lang, answers) values ('mandat', 'en', '{\"nom_prenom\": \"Test Public\"}')");
+  await withTx(async (tx) => {
+    await tx.as(null);
+    assert.equal(await tx.fails("insert into public.form_submissions (form, lang, answers) values ('mandat','fr','{}')"), PERMISSION_OR_RLS);
+    await tx.as("mandat");
+    assert.equal(await tx.fails("insert into public.form_submissions (form, lang, answers) values ('mandat','fr','{}')"), PERMISSION_OR_RLS);
+    assert.equal((await tx.q("select 1 from public.form_submissions")).length, 0, "une partie ne lit pas les formulaires");
+    assert.equal(await tx.fails("delete from public.form_submissions"), PERMISSION_OR_RLS);
+    await tx.as("admin");
+    assert.equal((await tx.q("select 1 from public.form_submissions")).length, 1, "l'admin les lit");
+    assert.equal(await tx.fails("update public.form_submissions set lang = 'fr'"), PERMISSION_OR_RLS);
   });
 });
 

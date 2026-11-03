@@ -5,8 +5,8 @@ import { getSession } from "@/lib/session";
 import { getMyDeal } from "@/lib/deal";
 import { sanitizeAnswers } from "@/lib/questionnaire";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { SubmitResult } from "@/components/QuestionnaireForm";
 
-export type SubmitResult = { ok: boolean; message?: string; errors?: Record<string, string> };
 
 export async function submitQuestionnaire(raw: unknown): Promise<SubmitResult> {
   const session = await getSession();

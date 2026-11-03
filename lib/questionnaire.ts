@@ -1,5 +1,6 @@
 // Questionnaires de cadrage (spécification §9). Les mêmes définitions servent au formulaire,
 // à la validation côté serveur, au récapitulatif et à la génération de l'accord.
+import { UI, type Lang } from "./i18n";
 
 export type Role = "partie_mandat" | "partie_investisseurs";
 export type Answers = Record<string, string | string[]>;
@@ -130,7 +131,7 @@ const MAX_TEXT = 500;
 const MAX_LONG = 2000;
 
 // Nettoie les réponses reçues (ne garde que les questions et options connues) et les valide.
-export function sanitizeAnswers(role: Role, raw: unknown): { answers: Answers; errors: Record<string, string> } {
+export function sanitizeAnswers(role: Role, raw: unknown, lang: Lang = "fr"): { answers: Answers; errors: Record<string, string> } {
   const input = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
   const answers: Answers = {};
   const errors: Record<string, string> = {};
@@ -156,11 +157,11 @@ export function sanitizeAnswers(role: Role, raw: unknown): { answers: Answers; e
       delete answers[q.id];
       continue;
     }
-    if (q.required && !answers[q.id]) errors[q.id] = "Cette réponse est obligatoire.";
+    if (q.required && !answers[q.id]) errors[q.id] = UI[lang].requiredErr;
   }
   const email = answers.email;
   if (typeof email === "string" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = "Cette adresse email n'est pas valide. Vérifiez-la, par exemple prenom@societe.com.";
+    errors.email = UI[lang].emailErr;
   }
   return { answers, errors };
 }

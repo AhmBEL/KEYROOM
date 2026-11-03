@@ -22,6 +22,8 @@ export default async function AdminPage() {
       <Logo width={160} />
       <h1 className="kr-title-2">Bonjour {profile.prenom}</h1>
 
+      <Link href="/admin/formulaires" className="kr-btn kr-btn--outline">Formulaires reçus</Link>
+
       <h2 className="kr-title-3">Inviter une partie</h2>
       <InviteForm deals={deals ?? []} />
 
