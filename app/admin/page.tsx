@@ -38,6 +38,8 @@ export default async function AdminPage() {
         </section>
       )) : <p className="kr-body">Aucun dossier pour le moment.</p>}
 
+      <Link href="/admin/diagnostic" className="kr-link">Diagnostic de la configuration</Link>
+
       <SignOutButton />
     </main>
   );
