@@ -25,16 +25,19 @@ const isSoc = (a: Answers) => a.acting === "soc";
 const isPart = (a: Answers) => a.acting === "part";
 const YNR = [o("oui", "Oui", "Yes"), o("oui_remarque", "Oui, avec une réserve", "Yes, with a reservation"), o("non", "Non", "No")];
 
-export const STEPS: { n: number; label: L }[] = [
-  { n: 1, label: l("Accord de commission et de non-contournement, signé par les trois parties", "Commission and non-circumvention agreement, signed by all three parties") },
-  { n: 2, label: l("Teaser anonyme de l'hôtel et critères de recherche anonymes de l'investisseur", "Anonymous hotel teaser and anonymous investor search criteria") },
-  { n: 3, label: l("Sélection de deux à trois hôtels par l'apporteur d'affaires", "Shortlist of two to three hotels by the business introducer") },
-  { n: 4, label: l("NDA signé par les deux parties", "NDA signed by both parties") },
-  { n: 5, label: l("Communication du nom de l'hôtel et des chiffres clés", "Disclosure of the hotel's name and key figures") },
-  { n: 6, label: l("Preuve de fonds et LOI, uniquement pour les hôtels sélectionnés", "Proof of funds and LOI, for shortlisted hotels only") },
-  { n: 7, label: l("MOU assorti d'une clause d'exclusivité", "MOU with an exclusivity clause") },
-  { n: 8, label: l("Documents sensibles, communiqués par paliers", "Sensitive documents, released in stages") },
-  { n: 9, label: l("Contrat de vente", "Sale contract") },
+// Logigramme du process : 9 étapes, l'étape 2 existe côté mandat et côté investisseurs, les étapes 5 et 6 se déroulent en parallèle.
+export type FlowStep = { n: number; side?: "m" | "i"; title: L; sub: L };
+export const STEPS: FlowStep[] = [
+  { n: 1, title: l("Accord tripartite", "Tripartite agreement"), sub: l("Signé par les trois parties ; accord sur le déroulé du processus", "Signed by all three parties; agreement on how the process will run") },
+  { n: 2, side: "m", title: l("Teaser anonyme", "Anonymous teaser"), sub: l("Hôtel : pays, taille, prix", "Hotel: country, size, price") },
+  { n: 2, side: "i", title: l("Critères anonymes", "Anonymous criteria"), sub: l("Budget, zone, type d'hôtel", "Budget, area, type of hotel") },
+  { n: 3, title: l("Sélection par l'apporteur d'affaires", "Selection by the business introducer"), sub: l("2 à 3 hôtels maximum", "2 to 3 hotels maximum") },
+  { n: 4, title: l("NDA signé par les deux parties", "NDA signed by both parties"), sub: l("Rien n'est communiqué avant cette étape", "Nothing is shared before this step") },
+  { n: 5, side: "m", title: l("Nom de l'hôtel et chiffres clés", "Hotel name and key figures"), sub: l("Communiqués par le détenteur de mandats", "Disclosed by the mandate holder") },
+  { n: 6, side: "i", title: l("Preuve de fonds et LOI", "Proof of funds and LOI"), sub: l("Uniquement sur la sélection", "Shortlisted hotels only") },
+  { n: 7, title: l("MOU et exclusivité", "MOU and exclusivity"), sub: l("Prix, délais, conditions", "Price, timing, conditions") },
+  { n: 8, title: l("Data room par paliers", "Data room, in stages"), sub: l("Documents sensibles, par étapes", "Sensitive documents, step by step") },
+  { n: 9, title: l("Contrat de vente", "Sale contract"), sub: l("Acte définitif, conditions suspensives", "Final deed, subject to conditions precedent") },
 ];
 
 export function sectionsFor(role: FormRole): Section[] {
@@ -175,6 +178,8 @@ export const TXT = {
     techCode: "Code technique :",
     langLabel: "Langue",
     flowLabel: "Le processus en 9 étapes",
+    legendM: "Côté mandat",
+    legendI: "Côté investisseurs",
     parallel: "en parallèle",
     parallelWith: (n: number) => `en parallèle avec l'étape ${n}`,
     step: "Étape",
@@ -213,6 +218,8 @@ export const TXT = {
     techCode: "Technical code:",
     langLabel: "Language",
     flowLabel: "The process in 9 steps",
+    legendM: "Mandate side",
+    legendI: "Investor side",
     parallel: "in parallel",
     parallelWith: (n: number) => `in parallel with step ${n}`,
     step: "Step",

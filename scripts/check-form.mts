@@ -26,7 +26,9 @@ for (const role of ["mandat", "investisseurs"] as FormRole[]) {
   ok(/apporteur d'affaires/.test(blob) && /business introducer/.test(blob), `${role} : terme neutre présent`);
   ok(/une à deux minutes/.test(TXT.fr.intro) && /one to two minutes/.test(TXT.en.intro), "durée 1 à 2 minutes");
 }
-ok(STEPS.length === 9, "9 étapes");
+ok(STEPS.length === 10 && new Set(STEPS.map((x) => x.n)).size === 9, "9 étapes (l'étape 2 existe des deux côtés)");
+ok(!/non-contournement|commission|middleman/i.test(JSON.stringify(STEPS)), "étape 1 sans commission ni non-contournement ; pas de « middleman »");
+ok(/signé par les trois parties/i.test(STEPS[0].sub.fr) && /accord sur le déroulé/i.test(STEPS[0].sub.fr), "étape 1 : signé par les trois, accord sur le déroulé");
 
 // Scénario mandat, société, non rémunéré
 const base = { acting: "soc", company_name: "Hôtels Océan Ltd", company_type: "Ltd", company_country: "Maurice", company_address: "1 rue X, Port-Louis",
