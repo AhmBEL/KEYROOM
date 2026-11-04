@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test:rls": "bash scripts/test-rls.sh",
     "check:secrets": "bash scripts/check-secrets.sh",
-    "test:i18n": "tsx scripts/check-i18n.mts"
+    "test:i18n": "tsx scripts/check-i18n.mts",
+    "test:form": "tsx scripts/check-form.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

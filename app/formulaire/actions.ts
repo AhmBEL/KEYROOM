@@ -3,26 +3,24 @@
 import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
 import { createAdminClient, KEY_INVALID } from "@/lib/supabase/admin";
-import { sanitizeAnswers, type Answers, type Role } from "@/lib/questionnaire";
-import { UI, isLang } from "@/lib/i18n";
-import type { SubmitMeta, SubmitResult } from "@/components/QuestionnaireForm";
+import { TXT, isFormRole, isLang, toStored, validateForm } from "@/lib/formdef";
+import type { PublicMeta, PublicResult } from "@/components/PublicForm";
 
-const ROLE: Record<string, Role> = { mandat: "partie_mandat", investisseurs: "partie_investisseurs" };
 const MAX_PER_HOUR = 10;
 const MIN_FILL_MS = 4000;
 
 // Enregistre un questionnaire public. Aucune connexion : le serveur contrôle tout.
-// Les valeurs sont toujours enregistrées en français, quelle que soit la langue affichée.
-export async function submitPublicForm(form: string, langRaw: string, raw: Answers, meta: SubmitMeta): Promise<SubmitResult> {
+// Pour chaque choix, on enregistre l'identifiant ET le libellé dans la langue choisie.
+export async function submitPublicForm(form: string, langRaw: string, answersRaw: unknown, declRaw: unknown, meta: PublicMeta): Promise<PublicResult> {
   const lang = isLang(langRaw) ? langRaw : "fr";
-  const t = UI[lang];
-  const role = ROLE[form];
-  if (!role) return { ok: false, message: t.fail };
+  const t = TXT[lang];
+  if (!isFormRole(form)) return { ok: false, message: t.fail };
 
   // Piège à robots : on répond « ok » sans rien enregistrer.
   if (meta?.hp) return { ok: true };
-  const { answers, errors } = sanitizeAnswers(role, raw, lang);
-  if (Object.keys(errors).length) return { ok: false, errors, message: t.missing };
+
+  const { answers, errors } = validateForm(form, lang, answersRaw, declRaw);
+  if (Object.keys(errors).length) return { ok: false, errors, message: errors.declarations && Object.keys(errors).length === 1 ? errors.declarations : t.missing };
   // Un formulaire complet envoyé en quelques secondes n'est pas rempli par une personne.
   if (typeof meta?.elapsed !== "number" || meta.elapsed < MIN_FILL_MS) return { ok: false, message: t.tooFast };
 
@@ -46,8 +44,10 @@ export async function submitPublicForm(form: string, langRaw: string, raw: Answe
     if ((count ?? 0) >= MAX_PER_HOUR) return { ok: false, message: t.limit };
   }
 
+  const validatedAt = new Date().toISOString();
+  const stored = toStored(form, lang, answers, validatedAt);
   try {
-    const { error } = await admin.from("form_submissions").insert({ form, lang, answers, ip_hash: ipHash });
+    const { error } = await admin.from("form_submissions").insert({ form, lang, answers: stored, ip_hash: ipHash });
     if (error) {
       console.error("[formulaire] enregistrement refusé :", error.code, error.message);
       return { ok: false, message: t.fail, detail: `db ${error.code || "?"}` };
@@ -56,5 +56,5 @@ export async function submitPublicForm(form: string, langRaw: string, raw: Answe
     console.error("[formulaire] enregistrement impossible :", e instanceof Error ? e.message : e);
     return { ok: false, message: t.fail, detail: "réseau" };
   }
-  return { ok: true };
+  return { ok: true, validatedAt };
 }

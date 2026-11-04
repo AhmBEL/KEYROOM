@@ -255,3 +255,58 @@ body {
 .kr-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
 .kr-lang a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-3); color: var(--ink); font-size: 14px; font-weight: 500; text-decoration: underline; }
 .kr-privacy { margin-bottom: var(--space-5); }
+
+/* ---- Questionnaires publics v2 ---- */
+.kr-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.kr-kicker { margin-top: var(--space-5); }
+
+/* Barre collante : progression + sélecteur FR / EN */
+.kr-bar { position: sticky; top: 0; z-index: 5; margin: 0 calc(-1 * var(--space-4)) var(--space-4); padding: env(safe-area-inset-top) var(--space-4) var(--space-2); background: var(--surface); border-bottom: 1px solid var(--line); }
+.kr-bar .kr-progress { position: static; margin: 0 calc(-1 * var(--space-4)); }
+.kr-bar__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); }
+.kr-bar__row--end { justify-content: flex-end; padding-top: 0; }
+.kr-bar__row .kr-small { margin: 0; }
+.kr-seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); overflow: hidden; flex: none; }
+.kr-seg button { min-width: 56px; min-height: 44px; padding: 0 var(--space-4); border: 0; background: transparent; color: var(--ink); font: 600 14px/20px var(--font-sans); letter-spacing: 0.08em; cursor: pointer; transition: background .2s; }
+.kr-seg button + button { border-left: 1px solid var(--line-strong); }
+.kr-seg button[aria-pressed="true"] { background: var(--action); color: var(--on-action); }
+.kr-seg button:not([aria-pressed="true"]):hover { background: var(--surface-sand); }
+.kr-seg button:focus-visible { outline-offset: -3px; }
+
+.kr-note { margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4); background: var(--surface-sand); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); font-size: 15px; line-height: 24px; color: var(--ink); }
+.kr-check { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 44px; padding: var(--space-2) 0; cursor: pointer; font-size: 16px; line-height: 24px; color: var(--text); }
+.kr-check input { flex: none; width: 24px; height: 24px; margin: 0; accent-color: var(--action); }
+.kr-recap-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 var(--space-4); padding: var(--space-4); background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-sm); font: 400 14px/22px var(--font-sans); color: var(--text); }
+
+/* Logigramme du process */
+.kr-flow { --g: 12px; margin: 0 0 var(--space-5); padding: 0; }
+.kr-flow__chart { display: grid; }
+.kr-flow__pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--g); }
+.kr-flow__par { display: none; }
+.kr-flow__box { display: flex; gap: var(--space-2); padding: 10px; background: var(--surface-raised); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: 15px; line-height: 22px; color: var(--text); word-break: normal; overflow-wrap: normal; hyphens: none; }
+.kr-flow__box--pair { flex-direction: column; align-items: flex-start; }
+.kr-flow__box--single { align-items: center; justify-content: center; text-align: center; }
+.kr-flow__n { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--surface-sand); border: 1px solid var(--line-strong); color: var(--ink); font-size: 13px; font-weight: 600; }
+/* Raccords : traits fins avec flèche vers le bas. Les deux cases d'une ligne sont centrées à 25 % et 75 %. */
+.kr-flow__line, .kr-flow__merge, .kr-flow__split { position: relative; }
+.kr-flow__line { height: 22px; }
+.kr-flow__merge, .kr-flow__split { height: 32px; }
+.kr-flow__line::before, .kr-flow__merge::after, .kr-flow__split::before { content: ""; position: absolute; left: 50%; width: 1px; background: var(--line-strong); }
+.kr-flow__line::before { top: 0; bottom: 5px; }
+.kr-flow__merge::before { content: ""; position: absolute; top: 0; height: 14px; left: calc(25% - var(--g) / 4); right: calc(25% - var(--g) / 4); border: 1px solid var(--line-strong); border-top: 0; }
+.kr-flow__merge::after { top: 14px; bottom: 5px; }
+.kr-flow__split::before { top: 0; height: 14px; }
+.kr-flow__split::after { content: ""; position: absolute; top: 14px; bottom: 5px; left: calc(25% - var(--g) / 4); right: calc(25% - var(--g) / 4); border: 1px solid var(--line-strong); border-bottom: 0; }
+.kr-flow i { position: absolute; bottom: 0; left: 50%; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--line-strong); transform: translateX(-50%); }
+.kr-flow__split i.c { display: none; }
+.kr-flow__split i.l { left: calc(25% - var(--g) / 4); }
+.kr-flow__split i.r { left: auto; right: calc(25% - var(--g) / 4); transform: translateX(50%); }
+/* Écran très étroit : les cases d'une ligne s'empilent, avec un petit libellé « en parallèle ». */
+@media (max-width: 330px) {
+  .kr-flow__pair { grid-template-columns: 1fr; gap: var(--space-1); }
+  .kr-flow__par { display: block; text-align: center; font-size: 12px; line-height: 18px; color: var(--text-muted); }
+  .kr-flow__merge::before, .kr-flow__split::after, .kr-flow__split i.l, .kr-flow__split i.r { display: none; }
+  .kr-flow__merge::after { top: 0; }
+  .kr-flow__split::before { height: auto; bottom: 5px; }
+  .kr-flow__split i.c { display: block; }
+}
