@@ -3,7 +3,7 @@
 export type Lang = "fr" | "en";
 export type L = Record<Lang, string>;
 export type FormRole = "mandat" | "investisseurs";
-export type Answers = Record<string, string>;
+export type Answers = Record<string, string | string[]>;
 export type Decl = Record<string, boolean>;
 
 export const isLang = (v: unknown): v is Lang => v === "fr" || v === "en";
@@ -13,6 +13,7 @@ type Opt = { id: string; label: L };
 type Base = { id: string; showIf?: (a: Answers) => boolean };
 export type Field =
   | (Base & { kind: "single"; label: L; options: Opt[]; required?: boolean })
+  | (Base & { kind: "multi"; label: L; options: Opt[]; required?: boolean })
   | (Base & { kind: "text" | "longtext" | "email" | "tel"; label: L; help?: L; required?: boolean; ac?: string })
   | (Base & { kind: "note"; text: L })
   | (Base & { kind: "flow" });
@@ -22,17 +23,17 @@ const l = (fr: string, en: string): L => ({ fr, en });
 const o = (id: string, fr: string, en: string): Opt => ({ id, label: l(fr, en) });
 const isSoc = (a: Answers) => a.acting === "soc";
 const isPart = (a: Answers) => a.acting === "part";
-const YNR = [o("oui", "Oui", "Yes"), o("oui_remarque", "Oui, avec une remarque", "Yes, with a comment"), o("non", "Non", "No")];
+const YNR = [o("oui", "Oui", "Yes"), o("oui_remarque", "Oui, avec une réserve", "Yes, with a reservation"), o("non", "Non", "No")];
 
 export const STEPS: { n: number; label: L }[] = [
-  { n: 1, label: l("Accord de commission et de non-contournement, signé par les trois", "Commission and non-circumvention agreement, signed by all three") },
-  { n: 2, label: l("Teaser anonyme de l'hôtel, critères anonymes de l'investisseur", "Anonymous hotel teaser, anonymous investor criteria") },
-  { n: 3, label: l("Sélection de 2 à 3 hôtels par l'apporteur d'affaires", "Shortlist of 2 to 3 hotels by the business introducer") },
-  { n: 4, label: l("NDA signé par les deux côtés", "NDA signed by both sides") },
-  { n: 5, label: l("Nom de l'hôtel et chiffres clés", "Hotel name and key figures") },
-  { n: 6, label: l("Preuve de fonds et LOI, uniquement sur la sélection", "Proof of funds and LOI, shortlisted hotels only") },
-  { n: 7, label: l("MOU avec exclusivité", "MOU with exclusivity") },
-  { n: 8, label: l("Documents sensibles, ouverts par paliers", "Sensitive documents, released in stages") },
+  { n: 1, label: l("Accord de commission et de non-contournement, signé par les trois parties", "Commission and non-circumvention agreement, signed by all three parties") },
+  { n: 2, label: l("Teaser anonyme de l'hôtel et critères de recherche anonymes de l'investisseur", "Anonymous hotel teaser and anonymous investor search criteria") },
+  { n: 3, label: l("Sélection de deux à trois hôtels par l'apporteur d'affaires", "Shortlist of two to three hotels by the business introducer") },
+  { n: 4, label: l("NDA signé par les deux parties", "NDA signed by both parties") },
+  { n: 5, label: l("Communication du nom de l'hôtel et des chiffres clés", "Disclosure of the hotel's name and key figures") },
+  { n: 6, label: l("Preuve de fonds et LOI, uniquement pour les hôtels sélectionnés", "Proof of funds and LOI, for shortlisted hotels only") },
+  { n: 7, label: l("MOU assorti d'une clause d'exclusivité", "MOU with an exclusivity clause") },
+  { n: 8, label: l("Documents sensibles, communiqués par paliers", "Sensitive documents, released in stages") },
   { n: 9, label: l("Contrat de vente", "Sale contract") },
 ];
 
@@ -44,101 +45,101 @@ export function sectionsFor(role: FormRole): Section[] {
   return [
     {
       id: "who",
-      title: l("Qui êtes-vous ?", "Who are you?"),
-      intro: l("Pour vous identifier correctement dans l'accord.", "To identify you correctly in the agreement."),
+      title: l("Identification", "Identification"),
+      intro: l("Ces informations permettent de vous identifier avec exactitude dans l'accord.", "These details allow you to be identified accurately in the agreement."),
       fields: [
-        { id: "acting", kind: "single", required: true, label: l("Vous agissez", "You are acting"),
-          options: [o("soc", "En tant que société", "As a company"), o("part", "En tant que particulier", "As an individual")] },
-        { id: "company_name", kind: "text", required: true, ac: "organization", showIf: isSoc, label: l("Nom de la société", "Company name") },
-        { id: "company_type", kind: "text", required: true, showIf: isSoc, label: l("Type de société", "Company type"), help: l("Ex. SARL, SA, Ltd, LLC", "e.g. Ltd, LLC, SA") },
-        { id: "company_country", kind: "text", required: true, ac: "country-name", showIf: isSoc, label: l("Pays où la société est enregistrée", "Country where the company is registered") },
-        { id: "company_reg", kind: "text", showIf: isSoc, label: l("Numéro d'enregistrement de la société", "Company registration number"), help: l("Si vous l'avez sous la main", "If you have it at hand") },
-        { id: "company_address", kind: "text", required: true, ac: "street-address", showIf: isSoc, label: l("Adresse du siège de la société", "Registered office address"), help: l("Rue, code postal, ville, pays", "Street, postcode, city, country") },
-        { id: "signer_name", kind: "text", required: true, ac: "name", showIf: isSoc, label: l("Nom et prénom de la personne qui signe", "Full name of the person signing") },
-        { id: "signer_role", kind: "text", required: true, ac: "organization-title", showIf: isSoc, label: l("Sa fonction dans la société", "Their position in the company"), help: l("Ex. gérant, directeur", "e.g. director, manager") },
+        { id: "acting", kind: "single", required: true, label: l("Vous intervenez", "You are acting"),
+          options: [o("soc", "En qualité de société", "As a company"), o("part", "En qualité de particulier", "As an individual")] },
+        { id: "company_name", kind: "text", required: true, ac: "organization", showIf: isSoc, label: l("Dénomination sociale", "Company name") },
+        { id: "company_type", kind: "text", required: true, showIf: isSoc, label: l("Forme juridique", "Legal form"), help: l("Par exemple : SARL, SA, Ltd, LLC", "For example: Ltd, LLC, SA") },
+        { id: "company_country", kind: "text", required: true, ac: "country-name", showIf: isSoc, label: l("Pays d'immatriculation de la société", "Country of registration of the company") },
+        { id: "company_reg", kind: "text", showIf: isSoc, label: l("Numéro d'immatriculation de la société", "Company registration number"), help: l("Si vous en disposez", "If available") },
+        { id: "company_address", kind: "text", required: true, ac: "street-address", showIf: isSoc, label: l("Adresse du siège social", "Registered office address"), help: l("Rue, code postal, ville, pays", "Street, postcode, city, country") },
+        { id: "signer_name", kind: "text", required: true, ac: "name", showIf: isSoc, label: l("Nom et prénom du signataire", "Full name of the signatory") },
+        { id: "signer_role", kind: "text", required: true, ac: "organization-title", showIf: isSoc, label: l("Fonction du signataire au sein de la société", "Position of the signatory within the company"), help: l("Par exemple : gérant, directeur", "For example: director, manager") },
         { id: "first_name", kind: "text", required: true, ac: "given-name", showIf: isPart, label: l("Prénom", "First name") },
         { id: "last_name", kind: "text", required: true, ac: "family-name", showIf: isPart, label: l("Nom", "Last name") },
-        { id: "home_address", kind: "text", required: true, ac: "street-address", showIf: isPart, label: l("Adresse où vous habitez", "Home address"), help: l("Rue, code postal, ville, pays", "Street, postcode, city, country") },
+        { id: "home_address", kind: "text", required: true, ac: "street-address", showIf: isPart, label: l("Adresse de résidence", "Residential address"), help: l("Rue, code postal, ville, pays", "Street, postcode, city, country") },
         { id: "email", kind: "email", required: true, ac: "email", label: l("Adresse email", "Email address") },
-        { id: "phone", kind: "tel", required: true, ac: "tel", label: l("Numéro de téléphone", "Phone number"), help: l("Avec l'indicatif, ex. +230 5…", "With country code, e.g. +230 5…") },
-        { id: "contact_pref", kind: "single", label: l("Le meilleur moyen de vous joindre", "Best way to reach you"),
+        { id: "phone", kind: "tel", required: true, ac: "tel", label: l("Numéro de téléphone", "Phone number"), help: l("Avec l'indicatif du pays, par exemple +230 5…", "Including the country code, for example +230 5…") },
+        { id: "contact_pref", kind: "multi", label: l("Vos moyens de contact privilégiés", "Your preferred means of contact"),
           options: [o("email", "Email", "Email"), o("phone", "Téléphone", "Phone"), o("whatsapp", "WhatsApp", "WhatsApp")] },
       ],
     },
     {
       id: "activity",
       title: l("Votre activité", "Your activity"),
-      intro: l("Deux points pour cadrer.", "Two points to set the scene."),
+      intro: l("Deux points de cadrage.", "Two scoping points."),
       fields: [
         ...(mandat
           ? ([
-              { id: "mandates_signed", kind: "single", required: true, label: l("Vos mandats signés par les propriétaires sont", "Your mandates signed by the owners are"),
-                options: [o("all_written", "Tous par écrit", "All in writing"), o("some_written", "Certains par écrit", "Some in writing"), o("mostly_verbal", "Surtout oraux", "Mostly verbal")] },
-              { id: "can_present", kind: "single", required: true, label: l("Vous pouvez présenter vos hôtels à un tiers et à ses investisseurs", "You can present your hotels to a third party and its investors"),
-                options: [o("yes_all", "Oui, pour tous", "Yes, for all"), o("yes_owner", "Oui, après accord du propriétaire", "Yes, after the owner's approval"), o("no", "Non", "No")] },
+              { id: "mandates_signed", kind: "single", required: true, label: l("Les mandats qui vous ont été confiés par les propriétaires sont", "The mandates entrusted to you by the owners are"),
+                options: [o("all_written", "Tous formalisés par écrit", "All in writing"), o("some_written", "Certains formalisés par écrit", "Some in writing"), o("mostly_verbal", "Principalement verbaux", "Mostly verbal")] },
+              { id: "can_present", kind: "single", required: true, label: l("Vous êtes autorisé à présenter vos hôtels à un tiers et à ses investisseurs", "You are authorised to present your hotels to a third party and its investors"),
+                options: [o("yes_all", "Oui, pour l'ensemble des hôtels", "Yes, for all hotels"), o("yes_owner", "Oui, sous réserve de l'accord du propriétaire", "Yes, subject to the owner's approval"), o("no", "Non", "No")] },
             ] as Field[])
           : ([
-              { id: "search_mandate", kind: "single", required: true, label: l("Vous avez un mandat de recherche écrit de vos investisseurs", "You hold a written search mandate from your investors"),
-                options: [o("yes_all", "Oui, pour tous", "Yes, for all"), o("some", "Pour certains", "For some"), o("no", "Non", "No")] },
-              { id: "can_present", kind: "single", required: true, label: l("Vous pouvez présenter leurs critères à un tiers, sous NDA", "You can present their criteria to a third party, under NDA"),
-                options: [o("yes_all", "Oui, pour tous", "Yes, for all"), o("yes_each", "Oui, après accord de chacun", "Yes, after each one's approval"), o("no", "Non", "No")] },
+              { id: "search_mandate", kind: "single", required: true, label: l("Vous disposez d'un mandat de recherche écrit de la part de vos investisseurs", "You hold a written search mandate from your investors"),
+                options: [o("yes_all", "Oui, pour l'ensemble de mes investisseurs", "Yes, for all of my investors"), o("some", "Pour certains d'entre eux", "For some of them"), o("no", "Non", "No")] },
+              { id: "can_present", kind: "single", required: true, label: l("Vous êtes autorisé à présenter leurs critères à un tiers, sous NDA", "You are authorised to present their criteria to a third party, under NDA"),
+                options: [o("yes_all", "Oui, pour l'ensemble de mes investisseurs", "Yes, for all of my investors"), o("yes_each", "Oui, sous réserve de l'accord de chacun", "Yes, subject to each one's approval"), o("no", "Non", "No")] },
             ] as Field[])),
         { id: "authority", kind: "single", required: true,
-          label: who("Jusqu'où pouvez-vous décider seul, ou avec votre associé, sans la validation du propriétaire de l'hôtel ?", "How far can you decide alone, or with your partner, without the hotel owner's approval?",
-            "Jusqu'où pouvez-vous décider seul, ou avec votre associé, sans la validation de vos investisseurs ?", "How far can you decide alone, or with your partner, without your investors' approval?"),
+          label: who("Jusqu'à quel stade pouvez-vous décider seul, ou avec votre associé, sans l'accord du propriétaire de l'hôtel ?", "Up to what stage can you decide alone, or together with your partner, without the hotel owner's approval?",
+            "Jusqu'à quel stade pouvez-vous décider seul, ou avec votre associé, sans l'accord de vos investisseurs ?", "Up to what stage can you decide alone, or together with your partner, without your investors' approval?"),
           options: [
             o("contrat", "Jusqu'à la préparation du contrat de vente", "Up to the preparation of the sale contract"),
-            { id: "docs", label: who("Jusqu'à l'échange des documents sensibles, puis j'ai besoin de la validation du propriétaire", "Up to the exchange of sensitive documents, then I need the owner's approval",
-                "Jusqu'à l'échange des documents sensibles, puis j'ai besoin de la validation de vos investisseurs", "Up to the exchange of sensitive documents, then I need your investors' approval") },
-            { id: "nda", label: who("Jusqu'à la signature d'un accord de confidentialité (NDA), puis j'ai besoin de la validation du propriétaire", "Up to signing a confidentiality agreement (NDA), then I need the owner's approval",
-                "Jusqu'à la signature d'un accord de confidentialité (NDA), puis j'ai besoin de la validation de vos investisseurs", "Up to signing a confidentiality agreement (NDA), then I need your investors' approval") },
-            { id: "debut", label: who("J'ai besoin de la validation du propriétaire dès le départ", "I need the owner's approval from the start",
-                "J'ai besoin de la validation de vos investisseurs dès le départ", "I need your investors' approval from the start") },
+            { id: "docs", label: who("Jusqu'à l'échange des documents sensibles, puis l'accord du propriétaire est requis", "Up to the exchange of sensitive documents, after which the owner's approval is required",
+                "Jusqu'à l'échange des documents sensibles, puis l'accord de vos investisseurs est requis", "Up to the exchange of sensitive documents, after which your investors' approval is required") },
+            { id: "nda", label: who("Jusqu'à la signature d'un accord de confidentialité (NDA), puis l'accord du propriétaire est requis", "Up to the signing of a confidentiality agreement (NDA), after which the owner's approval is required",
+                "Jusqu'à la signature d'un accord de confidentialité (NDA), puis l'accord de vos investisseurs est requis", "Up to the signing of a confidentiality agreement (NDA), after which your investors' approval is required") },
+            { id: "debut", label: who("L'accord du propriétaire est requis dès le départ", "The owner's approval is required from the outset",
+                "L'accord de vos investisseurs est requis dès le départ", "Your investors' approval is required from the outset") },
           ] },
-        { id: "authority_note", kind: "note", text: l("La signature du contrat de vente demande toujours l'accord du propriétaire ou des investisseurs.", "Signing the sale contract always requires the approval of the owner or the investors.") },
+        { id: "authority_note", kind: "note", text: l("La signature du contrat de vente requiert, dans tous les cas, l'accord du propriétaire ou des investisseurs.", "Signing the sale contract requires, in all cases, the approval of the owner or the investors.") },
       ],
     },
     {
       id: "commission",
       title: l("Commission", "Commission"),
-      intro: l("Pour savoir comment la commission sera répartie.", "To know how the commission will be shared."),
+      intro: l("Ces informations déterminent les modalités de répartition de la commission.", "These details determine how the commission will be allocated."),
       fields: [
-        { id: "paid", kind: "single", required: true, label: l("Pour ce projet, êtes-vous déjà rémunéré par votre côté ?", "For this project, are you already paid by your side?"),
+        { id: "paid", kind: "single", required: true, label: l("Pour ce projet, êtes-vous déjà rémunéré par votre mandant ?", "For this project, are you already remunerated by your principal?"),
           options: [
             { id: "paye", label: who("Oui, par le propriétaire de l'hôtel", "Yes, by the hotel owner", "Oui, par mes investisseurs (mandat de recherche)", "Yes, by my investors (search mandate)") },
-            o("non_paye", "Non, je ne suis pas rémunéré à part", "No, I am not paid separately"),
+            o("non_paye", "Non, je ne perçois pas de rémunération distincte", "No, I do not receive separate remuneration"),
           ] },
         { id: "share_note", kind: "note", showIf: (a) => a.paid === "non_paye",
-          text: who("Dans ce cas, la commission de la vente est partagée ainsi : 20 % pour l'apporteur d'affaires, 40 % pour vous et 40 % pour le représentant des investisseurs.",
-            "In that case, the sale commission is shared as follows: 20% for the business introducer, 40% for you and 40% for the investors' representative.",
-            "Dans ce cas, la commission de la vente est partagée ainsi : 20 % pour l'apporteur d'affaires, 40 % pour vous et 40 % pour le détenteur de mandats.",
-            "In that case, the sale commission is shared as follows: 20% for the business introducer, 40% for you and 40% for the mandate holder.") },
+          text: who("Dans ce cas, la commission de vente est répartie comme suit : 20 % pour l'apporteur d'affaires, 40 % pour vous-même et 40 % pour le représentant des investisseurs.",
+            "In that case, the sale commission is allocated as follows: 20% to the business introducer, 40% to you and 40% to the investors' representative.",
+            "Dans ce cas, la commission de vente est répartie comme suit : 20 % pour l'apporteur d'affaires, 40 % pour vous-même et 40 % pour le détenteur de mandats.",
+            "In that case, the sale commission is allocated as follows: 20% to the business introducer, 40% to you and 40% to the mandate holder.") },
         { id: "share_ok", kind: "single", required: true, showIf: (a) => a.paid === "non_paye",
-          label: l("Êtes-vous d'accord pour partager la commission dans ces conditions ?", "Do you agree to share the commission on these terms?"), options: YNR },
+          label: l("Acceptez-vous de partager la commission selon ces modalités ?", "Do you agree to share the commission on these terms?"), options: YNR },
       ],
     },
     {
       id: "process",
-      title: l("Le process proposé", "The proposed process"),
-      intro: l("Chacun donne un peu, l'autre répond au même niveau. Rien ne circule avant l'étape qui le justifie.", "Each side gives a little, the other answers at the same level. Nothing is shared before the step that justifies it."),
+      title: l("Le processus proposé", "The proposed process"),
+      intro: l("Chaque partie transmet progressivement des éléments, et l'autre y répond à un niveau équivalent. Aucune information n'est communiquée avant l'étape qui la justifie.", "Each party discloses information progressively, and the other responds at an equivalent level. No information is shared before the step that justifies it."),
       fields: [
         { id: "flow", kind: "flow" },
-        { id: "agree_process", kind: "single", required: true, label: l("Êtes-vous d'accord pour travailler dans ces conditions ?", "Do you agree to work on these terms?"), options: YNR },
-        { id: "comment", kind: "longtext", label: l("Une remarque ou un point à ajouter ?", "Any comment or point to add?"), help: l("Facultatif", "Optional") },
+        { id: "agree_process", kind: "single", required: true, label: l("Acceptez-vous de travailler selon ces modalités ?", "Do you agree to proceed on these terms?"), options: YNR },
+        { id: "comment", kind: "longtext", label: l("Souhaitez-vous formuler une remarque ou ajouter un point ?", "Would you like to add a comment or raise a point?"), help: l("Facultatif", "Optional") },
       ],
     },
     {
       id: "declaration",
       title: l("Votre déclaration", "Your declaration"),
-      intro: l("Avant de valider, lisez et cochez chaque point.", "Before submitting, read and tick each point."),
+      intro: l("Avant de valider, veuillez lire et cocher chacun des points suivants.", "Before submitting, please read and tick each of the following points."),
       fields: [],
-      checksLabel: l("Je confirme que :", "I confirm that:"),
+      checksLabel: l("Je déclare que :", "I declare that:"),
       checks: [
         { id: "d1", label: l("Les informations et documents que je transmets sont exacts, complets et à jour, à ma connaissance.", "The information and documents I provide are accurate, complete and up to date, to the best of my knowledge.") },
-        { id: "d2", label: l("J'ai le droit de les communiquer.", "I have the right to share them.") },
+        { id: "d2", label: l("Je suis en droit de les communiquer.", "I am entitled to share them.") },
         { id: "d3", label: l("Je suis seul responsable de ce que je transmets, y compris des documents que je dépose.", "I am solely responsible for what I provide, including any documents I upload.") },
-        { id: "d4", label: l("L'apporteur d'affaires relaie les informations sans les garantir. Il fait des contrôles raisonnables avec les moyens dont il dispose, sans obligation de vérifier, et n'est pas responsable d'une information erronée transmise par une partie.",
-            "The business introducer relays information without guaranteeing it. They carry out reasonable checks with the means available to them, with no obligation to verify, and are not liable for inaccurate information provided by a party.") },
+        { id: "d4", label: l("L'apporteur d'affaires relaie les informations sans les garantir. Il procède à des vérifications raisonnables avec les moyens dont il dispose, sans obligation de vérification, et ne saurait être tenu responsable d'une information erronée transmise par l'une des parties.",
+            "The business introducer relays information without guaranteeing it. They carry out reasonable checks with the means available to them, without any obligation to verify, and cannot be held liable for inaccurate information provided by a party.") },
       ],
     },
   ];
@@ -146,31 +147,34 @@ export function sectionsFor(role: FormRole): Section[] {
 
 export const TXT = {
   fr: {
-    kicker: "Confidentiel · Mise en relation hôtels",
+    kicker: "Confidentiel · Mise en relation hôtelière",
     titleMandat: "Détenteur de mandats de vente",
     titleInvest: "Représentant d'investisseurs",
-    intro: "Quelques questions de cadrage préparées par l'apporteur d'affaires de cette mise en relation. Elles servent à rédiger un accord qui protège chaque partie. Comptez une à deux minutes : presque tout se fait d'un tap.",
-    notice: "À ne pas indiquer ici : coordonnées bancaires, noms d'hôtels ou d'investisseurs, chiffres confidentiels. Ils viendront plus tard, par paliers, après signature d'un NDA.",
+    intro: "Ce questionnaire de cadrage a été préparé par l'apporteur d'affaires en charge de cette mise en relation. Il permet de rédiger un accord protégeant chacune des parties. Prévoyez une à deux minutes : l'essentiel des réponses se sélectionne d'un simple geste.",
+    notice: "À ne pas renseigner ici : coordonnées bancaires, noms d'hôtels ou d'investisseurs, chiffres confidentiels. Ces éléments seront échangés ultérieurement, par paliers, après la signature d'un accord de confidentialité (NDA).",
     progress: (n: number, t: number) => `${n} réponse${n > 1 ? "s" : ""} sur ${t}`,
     progressLabel: "Progression du questionnaire",
     required: "(obligatoire)",
-    submit: "Valider mes réponses",
-    sending: "Envoi…",
-    thanksTitle: "Merci, c'est noté.",
-    thanksText: "L'apporteur d'affaires revient vers vous rapidement. Vous pouvez fermer cette page.",
+    multi: "Plusieurs choix possibles.",
+    submit: "Valider et transmettre",
+    sending: "Transmission en cours…",
+    thanksTitle: "Vos réponses ont bien été enregistrées",
+    thanksText: "Nous vous remercions. Vous trouverez ci-dessous le récapitulatif de votre saisie.",
+    doneTitle: "Votre démarche est terminée",
+    doneText: "Vos réponses ont bien été transmises à l'apporteur d'affaires, qui reviendra vers vous dans les meilleurs délais. Vous pouvez dès à présent fermer cette page.",
     copy: "Copier le récapitulatif",
     copied: "Récapitulatif copié.",
-    errRequired: "Cette réponse est obligatoire.",
-    errEmail: "Cette adresse email n'est pas valide. Vérifiez-la, par exemple prenom@societe.com.",
-    errPhone: "Ce numéro n'est pas valide. Indiquez-le avec l'indicatif, par exemple +230 5 123 4567.",
-    errDecl: "Cochez chaque point pour continuer.",
-    missing: "Certaines réponses obligatoires manquent. Elles sont signalées ci-dessous.",
-    fail: "L'envoi a échoué. Vérifiez votre connexion et réessayez. Vous pouvez aussi copier le récapitulatif ci-dessous.",
-    tooFast: "Relisez vos réponses un instant, puis envoyez à nouveau.",
-    limit: "Trop d'envois depuis votre connexion. Réessayez plus tard.",
+    errRequired: "Cette réponse est requise.",
+    errEmail: "Cette adresse email n'est pas valide. Veuillez la vérifier, par exemple prenom@societe.com.",
+    errPhone: "Ce numéro n'est pas valide. Veuillez le saisir avec l'indicatif du pays, par exemple +230 5 123 4567.",
+    errDecl: "Veuillez cocher chacune des déclarations pour poursuivre.",
+    missing: "Certaines réponses requises sont manquantes. Elles sont signalées ci-dessous.",
+    fail: "La transmission a échoué. Veuillez vérifier votre connexion et réessayer. Vous pouvez également copier le récapitulatif ci-dessous.",
+    tooFast: "Veuillez relire vos réponses, puis valider à nouveau.",
+    limit: "Le nombre d'envois depuis votre connexion est trop élevé. Veuillez réessayer ultérieurement.",
     techCode: "Code technique :",
     langLabel: "Langue",
-    flowLabel: "Le process en 9 étapes",
+    flowLabel: "Le processus en 9 étapes",
     parallel: "en parallèle",
     parallelWith: (n: number) => `en parallèle avec l'étape ${n}`,
     step: "Étape",
@@ -184,25 +188,28 @@ export const TXT = {
     kicker: "Confidential · Hotel introductions",
     titleMandat: "Holder of hotel sale mandates",
     titleInvest: "Investors' representative",
-    intro: "A few scoping questions prepared by the business introducer for this introduction. They are used to draft an agreement that protects each party. It takes one to two minutes: almost everything is a tap.",
-    notice: "Please do not include here: bank details, hotel or investor names, confidential figures. These will come later, in stages, after an NDA is signed.",
+    intro: "This scoping questionnaire has been prepared by the business introducer responsible for this introduction. It is used to draft an agreement that protects each party. Please allow one to two minutes: most answers can be selected with a single tap.",
+    notice: "Please do not provide here: bank details, hotel or investor names, or confidential figures. These will be exchanged at a later stage, in successive steps, once a confidentiality agreement (NDA) has been signed.",
     progress: (n: number, t: number) => `${n} of ${t} answered`,
     progressLabel: "Questionnaire progress",
     required: "(required)",
-    submit: "Submit my answers",
-    sending: "Sending…",
-    thanksTitle: "Thank you, noted.",
-    thanksText: "The business introducer will get back to you shortly. You may close this page.",
+    multi: "Several choices possible.",
+    submit: "Confirm and submit",
+    sending: "Submitting…",
+    thanksTitle: "Your answers have been recorded",
+    thanksText: "Thank you. Please find below a summary of your submission.",
+    doneTitle: "Your submission is complete",
+    doneText: "Your answers have been passed on to the business introducer, who will get back to you as soon as possible. You may now close this page.",
     copy: "Copy summary",
     copied: "Summary copied.",
     errRequired: "This answer is required.",
     errEmail: "This email address is not valid. Please check it, for example name@company.com.",
-    errPhone: "This number is not valid. Please include the country code, for example +230 5 123 4567.",
-    errDecl: "Please tick every point to continue.",
+    errPhone: "This number is not valid. Please enter it with the country code, for example +230 5 123 4567.",
+    errDecl: "Please tick each declaration to continue.",
     missing: "Some required answers are missing. They are marked below.",
-    fail: "Sending failed. Please check your connection and try again. You can also copy the summary below.",
-    tooFast: "Please review your answers for a moment, then send again.",
-    limit: "Too many submissions from your connection. Please try again later.",
+    fail: "The submission failed. Please check your connection and try again. You may also copy the summary below.",
+    tooFast: "Please review your answers, then submit again.",
+    limit: "Too many submissions have been made from your connection. Please try again later.",
     techCode: "Technical code:",
     langLabel: "Language",
     flowLabel: "The process in 9 steps",
@@ -221,7 +228,7 @@ export const TXT = {
 // Parcours des champs, visibilité, progression
 // ---------------------------------------------------------------------------
 
-type Entry = Field & { kind: "single" | "text" | "longtext" | "email" | "tel" };
+type Entry = Field & { kind: "single" | "multi" | "text" | "longtext" | "email" | "tel" };
 const isInput = (f: Field): f is Entry => f.kind !== "note" && f.kind !== "flow";
 
 export const allFields = (role: FormRole) => sectionsFor(role).flatMap((s) => s.fields);
@@ -231,7 +238,7 @@ export const isShown = (f: Field, a: Answers) => !f.showIf || f.showIf(a);
 export function progress(role: FormRole, a: Answers, decl: Decl) {
   const sections = sectionsFor(role);
   const req = sections.flatMap((s) => s.fields).filter(isInput).filter((f) => f.required && isShown(f, a));
-  const done = req.filter((f) => (a[f.id] ?? "").trim() !== "").length;
+  const done = req.filter((f) => { const v = a[f.id]; return Array.isArray(v) ? v.length > 0 : (v ?? "").trim() !== ""; }).length;
   const checks = sections.flatMap((s) => s.checks ?? []);
   return { done: done + checks.filter((c) => decl[c.id]).length, total: req.length + checks.length };
 }
@@ -256,6 +263,11 @@ export function validateForm(role: FormRole, lang: Lang, rawAnswers: unknown, ra
 
   for (const f of fields) {
     const v = input[f.id];
+    if (f.kind === "multi") {
+      // Seuls les identifiants connus sont gardés, dans l'ordre des options.
+      if (Array.isArray(v)) { const kept = f.options.map((x) => x.id).filter((id) => v.includes(id)); if (kept.length) answers[f.id] = kept; }
+      continue;
+    }
     if (typeof v !== "string") continue;
     if (f.kind === "single") {
       if (f.options.some((x) => x.id === v)) answers[f.id] = v;
@@ -268,8 +280,9 @@ export function validateForm(role: FormRole, lang: Lang, rawAnswers: unknown, ra
     if (!isShown(f, answers)) { delete answers[f.id]; continue; }
     const v = answers[f.id];
     if (f.required && !v) { errors[f.id] = t.errRequired; continue; }
-    if (v && f.kind === "email" && !EMAIL_RE.test(v)) errors[f.id] = t.errEmail;
-    if (v && f.kind === "tel" && !(/^[0-9+()\s.\-]+$/.test(v) && v.replace(/\D/g, "").length >= 6)) errors[f.id] = t.errPhone;
+    if (typeof v !== "string") continue;
+    if (f.kind === "email" && !EMAIL_RE.test(v)) errors[f.id] = t.errEmail;
+    if (f.kind === "tel" && !(/^[0-9+()\s.\-]+$/.test(v) && v.replace(/\D/g, "").length >= 6)) errors[f.id] = t.errPhone;
   }
   const checks = sectionsFor(role).flatMap((s) => s.checks ?? []);
   const decl: Decl = {};
@@ -283,7 +296,7 @@ export type Stored = {
   role: FormRole;
   lang: Lang;
   validated_at: string;
-  fields: Record<string, { id: string; label: string } | { value: string }>;
+  fields: Record<string, { id: string; label: string } | { ids: string[]; labels: string[] } | { value: string }>;
   declarations: { id: string; label: string; checked: true }[];
 };
 
@@ -292,8 +305,10 @@ export function toStored(role: FormRole, lang: Lang, answers: Answers, validated
   const fields: Stored["fields"] = {};
   for (const f of allFields(role).filter(isInput)) {
     const v = answers[f.id];
-    if (!v) continue;
-    fields[f.id] = f.kind === "single" ? { id: v, label: f.options.find((x) => x.id === v)!.label[lang] } : { value: v };
+    if (!v || (Array.isArray(v) && !v.length)) continue;
+    if (f.kind === "multi" && Array.isArray(v)) fields[f.id] = { ids: v, labels: v.map((id) => f.options.find((x) => x.id === id)!.label[lang]) };
+    else if (f.kind === "single" && typeof v === "string") fields[f.id] = { id: v, label: f.options.find((x) => x.id === v)!.label[lang] };
+    else if (typeof v === "string") fields[f.id] = { value: v };
   }
   const declarations = sectionsFor(role).flatMap((s) => s.checks ?? []).map((c) => ({ id: c.id, label: c.label[lang], checked: true as const }));
   return { v: 2, role, lang, validated_at: validatedAt, fields, declarations };
@@ -309,7 +324,9 @@ export function recapRows(s: Stored, lang: Lang) {
     for (const f of sec.fields.filter(isInput)) {
       const a = s.fields[f.id];
       if (!a) continue;
-      rows.push({ section: sec.title[lang], label: f.label[lang], value: "id" in a ? optionLabel(s.role, f.id, a.id, lang) ?? a.label : a.value });
+      const value = "ids" in a ? a.ids.map((id, i) => optionLabel(s.role, f.id, id, lang) ?? a.labels[i]).join(", ")
+        : "id" in a ? optionLabel(s.role, f.id, a.id, lang) ?? a.label : a.value;
+      rows.push({ section: sec.title[lang], label: f.label[lang], value });
     }
   }
   return rows;

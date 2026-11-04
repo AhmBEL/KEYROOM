@@ -56,9 +56,13 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
     setLang(l); setCopied(false); setErrors({}); setMessage(null); setDetail(null);
     try { localStorage.setItem(KEY, l); } catch { /* sans mémoire */ }
   };
-  const setAnswer = (id: string, v: string) => {
+  const setAnswer = (id: string, v: string | string[]) => {
     setAnswers((a) => ({ ...a, [id]: v }));
     setErrors((e) => { if (!e[id]) return e; const { [id]: _, ...rest } = e; return rest; });
+  };
+  const toggleMulti = (id: string, optionId: string) => {
+    const cur = Array.isArray(answers[id]) ? (answers[id] as string[]) : [];
+    setAnswer(id, cur.includes(optionId) ? cur.filter((x) => x !== optionId) : [...cur, optionId]);
   };
   const { done, total } = progress(role, answers, decl);
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -113,6 +117,13 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
         <pre className="kr-recap-text">{text}</pre>
         <button type="button" className="kr-btn kr-btn--outline" onClick={async () => setCopied(await copyText(text))}>{t.copy}</button>
         {copied && <p className="kr-success" role="status">{t.copied}</p>}
+
+        {/* Fin de parcours, bien visible : la démarche est terminée, la page peut être fermée. */}
+        <section className="kr-done" aria-labelledby="done-title">
+          <span className="kr-done__badge" aria-hidden="true">✓</span>
+          <h2 id="done-title" className="kr-title-2">{t.doneTitle}</h2>
+          <p className="kr-body">{t.doneText}</p>
+        </section>
       </div>
     );
   }
@@ -139,6 +150,24 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
         </fieldset>
       );
     }
+    if (f.kind === "multi") {
+      const picked = Array.isArray(answers[f.id]) ? (answers[f.id] as string[]) : [];
+      return (
+        <fieldset key={f.id} id={`q-${f.id}`} className="kr-fieldset">
+          <legend>{label}</legend>
+          <p className="kr-hint">{t.multi}</p>
+          <div className="kr-chips">
+            {f.options.map((opt) => (
+              <label key={opt.id} className="kr-chip">
+                <input type="checkbox" name={f.id} value={opt.id} checked={picked.includes(opt.id)} onChange={() => toggleMulti(f.id, opt.id)} />
+                <span>{opt.label[lang]}</span>
+              </label>
+            ))}
+          </div>
+          {err && <p className="kr-error" role="alert">{err}</p>}
+        </fieldset>
+      );
+    }
     const help = f.help ? <p id={`h-${f.id}`} className="kr-hint">{f.help[lang]}</p> : null;
     return (
       <div key={f.id} id={`q-${f.id}`} className="kr-field">
@@ -149,7 +178,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
         ) : (
           <input id={`f-${f.id}`} className="kr-input" type={f.kind === "email" ? "email" : f.kind === "tel" ? "tel" : "text"}
             inputMode={f.kind === "email" ? "email" : f.kind === "tel" ? "tel" : undefined} autoComplete={f.ac ?? "off"} maxLength={500}
-            value={answers[f.id] ?? ""} onChange={(e) => setAnswer(f.id, e.target.value)}
+            value={(answers[f.id] as string) ?? ""} onChange={(e) => setAnswer(f.id, e.target.value)}
             aria-invalid={err ? true : undefined} aria-describedby={help ? `h-${f.id}` : undefined} />
         )}
         {help}

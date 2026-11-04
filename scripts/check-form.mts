@@ -58,15 +58,29 @@ const st = toStored("mandat", "en", clean, "2026-11-04T16:36:00.000Z");
 ok(st.lang === "en" && st.v === 2 && st.declarations.length === 4 && st.validated_at.startsWith("2026-11-04"), "enregistrement : lang, date, déclarations");
 const au = st.fields.authority as { id: string; label: string };
 ok(au.id === "nda" && /confidentiality agreement/.test(au.label), "id + libellé anglais");
-ok(/je dois|j'ai besoin de la validation du propriétaire/i.test(recapText(st, "fr")), "récapitulatif retraduit en français depuis les identifiants");
-ok(/Up to signing a confidentiality agreement/.test(recapText(st, "en")), "récapitulatif en anglais");
+ok(/l'accord du propriétaire est requis/.test(recapText(st, "fr")), "récapitulatif retraduit en français depuis les identifiants");
+ok(/Up to the signing of a confidentiality agreement/.test(recapText(st, "en")), "récapitulatif en anglais");
 ok(!/Ahmed|Belhadj/i.test(recapText(st, "fr") + recapText(st, "en")), "récapitulatif sans nom propre");
 // investisseurs : libellés adaptés
 const inv = allFields("investisseurs").find((f) => f.id === "authority");
-ok(inv?.kind === "single" && /vos investisseurs/.test(inv.options[3].label.fr) && /your investors/.test(inv.options[3].label.en), "investisseurs : « vos investisseurs »");
+ok(inv?.kind === "single" && /vos investisseurs/.test(inv.options[3].label.fr) && /your investors/i.test(inv.options[3].label.en), "investisseurs : « vos investisseurs »");
 const note = allFields("investisseurs").find((f) => f.id === "share_note");
 ok(note?.kind === "note" && /détenteur de mandats/.test(note.text.fr) && /mandate holder/.test(note.text.en), "investisseurs : encadré 20/40/40 adapté");
 ok(progress("mandat", base, allD).done === progress("mandat", base, allD).total, "progression : tout répondu");
+
+// Moyens de contact : choix multiple facultatif
+v = validateForm("mandat", "fr", { ...base, contact_pref: ["whatsapp", "email", "inconnu"] }, allD);
+ok(JSON.stringify(v.answers.contact_pref) === JSON.stringify(["email", "whatsapp"]) && Object.keys(v.errors).length === 0, "contact_pref : identifiants connus, dans l'ordre des options");
+const st2 = toStored("mandat", "en", v.answers, "2026-11-04T16:36:00.000Z");
+const cp = st2.fields.contact_pref as { ids: string[]; labels: string[] };
+ok(cp.ids.join() === "email,whatsapp" && cp.labels.join() === "Email,WhatsApp", "contact_pref enregistré (ids + libellés)");
+ok(/Email, WhatsApp/.test(recapText(st2, "fr")), "contact_pref dans le récapitulatif");
+v = validateForm("mandat", "fr", { ...base, contact_pref: [] }, allD);
+ok(!("contact_pref" in v.answers) && Object.keys(v.errors).length === 0, "contact_pref vide : facultatif");
+v = validateForm("mandat", "fr", { ...base, contact_pref: "email" }, allD);
+ok(!("contact_pref" in v.answers), "contact_pref : une chaîne n'est pas acceptée");
+const cpf = allFields("mandat").find((f) => f.id === "contact_pref");
+ok(cpf?.kind === "multi", "contact_pref est un choix multiple");
 
 if (fails) { console.error(`${fails} échec(s)`); process.exit(1); }
 console.log("OK : questionnaires publics (définition, logique, validation, enregistrement).");

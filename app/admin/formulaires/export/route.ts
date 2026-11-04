@@ -35,6 +35,7 @@ export async function GET(request: Request) {
         ...fields.map((f) => {
           const v = a.fields[f.id];
           if (!v) return "";
+          if ("ids" in v) return v.ids.map((id, i) => optionLabel(role, f.id, id, "fr") ?? v.labels[i]).join(", ");
           return "id" in v ? optionLabel(role, f.id, v.id, "fr") ?? v.label : v.value;
         }),
         a.declarations.length === checks.length ? "Oui" : "Non",

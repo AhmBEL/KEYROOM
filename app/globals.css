@@ -310,3 +310,9 @@ body {
   .kr-flow__split::before { height: auto; bottom: 5px; }
   .kr-flow__split i.c { display: block; }
 }
+
+/* Écran de fin : démarche terminée */
+.kr-done { display: grid; justify-items: center; gap: var(--space-3); margin: var(--space-7) 0 var(--space-6); padding: var(--space-6) var(--space-5); text-align: center; background: var(--panel-deep); color: var(--on-panel); border-radius: var(--radius-md); }
+.kr-done .kr-title-2 { color: var(--on-panel); margin: 0; }
+.kr-done .kr-body { color: var(--on-panel); margin: 0; }
+.kr-done__badge { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #0b1f33; font-size: 28px; font-weight: 600; line-height: 1; }
