@@ -188,6 +188,10 @@ export const TXT = {
     language: "Langue",
     declarations: "Déclarations cochées",
     form: "Questionnaire",
+    indexTitle: "Questionnaire de cadrage",
+    indexText: "Veuillez sélectionner le questionnaire correspondant à votre situation.",
+    pickMandat: "Je suis détenteur de mandats de vente d'hôtels",
+    pickInvest: "Je représente des investisseurs",
   },
   en: {
     kicker: "Confidential · Hotel introductions",
@@ -228,6 +232,10 @@ export const TXT = {
     language: "Language",
     declarations: "Declarations ticked",
     form: "Questionnaire",
+    indexTitle: "Scoping questionnaire",
+    indexText: "Please select the questionnaire that applies to your situation.",
+    pickMandat: "I hold hotel sale mandates",
+    pickInvest: "I represent investors",
   },
 } as const;
 

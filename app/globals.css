@@ -52,6 +52,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --surface: #0b1f33;
   --surface-raised: #102a44;
   --surface-sand: #16334f;
@@ -232,7 +233,7 @@ body {
 .kr-chip:has(input:checked) { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: var(--surface-sand); color: var(--ink); font-weight: 600; }
 .kr-chip:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 3px; }
 .kr-textarea { resize: vertical; min-height: 120px; }
-.kr-sticky { position: sticky; bottom: 0; padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); margin-top: var(--space-5); }
+.kr-sticky { padding: var(--space-4) 0 calc(var(--space-5) + env(safe-area-inset-bottom)); margin-top: var(--space-5); }
 .kr-page--has-sticky { padding-bottom: var(--space-4); }
 .kr-file { padding: 10px 14px; }
 
@@ -290,16 +291,17 @@ body {
 .kr-flow__t { display: grid; gap: 2px; }
 .kr-flow__t b { font-weight: 600; color: var(--ink); }
 .kr-flow__t span { color: var(--text-muted); }
-/* Côté mandat (terracotta) et côté investisseurs (vert) : teintes issues des variables de la charte, claires et sombres. */
-.kr-flow__box--m { background: color-mix(in srgb, var(--danger) 9%, var(--surface-raised)); border-color: color-mix(in srgb, var(--danger) 55%, var(--surface-raised)); }
-.kr-flow__box--m .kr-flow__t b, .kr-flow__box--m .kr-flow__t span { color: var(--danger); }
-.kr-flow__box--i { background: color-mix(in srgb, var(--success) 9%, var(--surface-raised)); border-color: color-mix(in srgb, var(--success) 55%, var(--surface-raised)); }
-.kr-flow__box--i .kr-flow__t b, .kr-flow__box--i .kr-flow__t span { color: var(--success); }
+/* Côté mandat : or champagne. Côté investisseurs : beige sable. Teintes claires de la charte, texte bleu nuit. */
+.kr-flow__box--m { background: var(--or-champagne); border-color: var(--or-champagne); }
+.kr-flow__box--i { background: var(--beige-sable); border-color: var(--or-champagne); }
+.kr-flow__box--m .kr-flow__t b, .kr-flow__box--m .kr-flow__t span,
+.kr-flow__box--i .kr-flow__t b, .kr-flow__box--i .kr-flow__t span { color: var(--bleu-nuit); }
+.kr-flow__box--m .kr-flow__n, .kr-flow__box--i .kr-flow__n { background: var(--ivoire); border-color: var(--bleu-nuit); color: var(--bleu-nuit); }
 .kr-flow__legend { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: var(--space-4) 0 0; font-size: 14px; line-height: 20px; color: var(--text); }
 .kr-flow__key { display: inline-flex; align-items: center; gap: var(--space-2); }
-.kr-flow__key::before { content: ""; width: 14px; height: 14px; border-radius: 2px; border: 1px solid; }
-.kr-flow__key--m::before { background: color-mix(in srgb, var(--danger) 18%, var(--surface-raised)); border-color: var(--danger); }
-.kr-flow__key--i::before { background: color-mix(in srgb, var(--success) 18%, var(--surface-raised)); border-color: var(--success); }
+.kr-flow__key::before { content: ""; width: 16px; height: 16px; border-radius: 2px; border: 1px solid var(--or-champagne); }
+.kr-flow__key--m::before { background: var(--or-champagne); }
+.kr-flow__key--i::before { background: var(--beige-sable); }
 /* Raccords : traits fins avec flèche vers le bas. Les deux cases d'une ligne sont centrées à 25 % et 75 %. */
 .kr-flow__line, .kr-flow__merge, .kr-flow__split { position: relative; }
 .kr-flow__line { height: 22px; }

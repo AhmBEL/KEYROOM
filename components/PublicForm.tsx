@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import {
-  TXT, isLang, isShown, progress, recapText, sectionsFor, toStored, validateForm,
+  TXT, isShown, progress, recapText, sectionsFor, toStored, validateForm,
   type Answers, type Decl, type Field, type FormRole, type Lang, type Stored,
 } from "@/lib/formdef";
 import { ProcessFlow } from "./ProcessFlow";
+import { LangSlider } from "./LangSlider";
+import { useFormLang } from "./useFormLang";
 
 export type PublicResult = { ok: boolean; message?: string; errors?: Record<string, string>; detail?: string; validatedAt?: string };
 export type PublicMeta = { hp: string; elapsed: number };
-const KEY = "kr-form-lang";
 
 async function copyText(text: string) {
   try { await navigator.clipboard.writeText(text); return true; } catch { /* repli ci-dessous */ }
@@ -31,7 +32,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
 }) {
   const sections = useMemo(() => sectionsFor(role), [role]);
   const startedAt = useRef(Date.now());
-  const [lang, setLang] = useState<Lang>(initialLang);
+  const { lang, choose: persistLang } = useFormLang(initialLang, explicit);
   const [answers, setAnswers] = useState<Answers>({});
   const [decl, setDecl] = useState<Decl>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,18 +44,8 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
   const [pending, start] = useTransition();
   const t = TXT[lang];
 
-  // Langue : lien (?lang) > choix mémorisé > langue du navigateur (fr, sinon anglais).
-  useEffect(() => {
-    let next: Lang | null = explicit ? initialLang : null;
-    if (!next) { try { const s = localStorage.getItem(KEY); if (isLang(s)) next = s; } catch { /* sans mémoire */ } }
-    if (!next) next = (navigator.language || "").toLowerCase().startsWith("fr") ? "fr" : "en";
-    setLang(next);
-  }, [explicit, initialLang]);
-  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
-
   const choose = (l: Lang) => {
-    setLang(l); setCopied(false); setErrors({}); setMessage(null); setDetail(null);
-    try { localStorage.setItem(KEY, l); } catch { /* sans mémoire */ }
+    persistLang(l); setCopied(false); setErrors({}); setMessage(null); setDetail(null);
   };
   const setAnswer = (id: string, v: string | string[]) => {
     setAnswers((a) => ({ ...a, [id]: v }));
@@ -94,13 +85,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
     return Object.keys(v.errors).length ? null : recapText(toStored(role, lang, v.answers, new Date().toISOString()), lang);
   }, [role, lang, answers, decl]);
 
-  const LangSlider = (
-    <div className="kr-seg" role="group" aria-label={`${TXT.fr.langLabel} / ${TXT.en.langLabel}`}>
-      {(["fr", "en"] as const).map((l) => (
-        <button key={l} type="button" lang={l} aria-pressed={lang === l} onClick={() => choose(l)}>{l.toUpperCase()}</button>
-      ))}
-    </div>
-  );
+  const langSlider = <LangSlider lang={lang} onChange={choose} />;
 
   const title = role === "mandat" ? t.titleMandat : t.titleInvest;
 
@@ -108,7 +93,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
     const text = recapText(sent, lang);
     return (
       <div lang={lang}>
-        <div className="kr-bar"><div className="kr-bar__row kr-bar__row--end">{LangSlider}</div></div>
+        <div className="kr-bar"><div className="kr-bar__row kr-bar__row--end">{langSlider}</div></div>
         <div role="status">
           <h1 className="kr-title-2">{t.thanksTitle}</h1>
           <p className="kr-body">{t.thanksText}</p>
@@ -193,7 +178,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
         <div className="kr-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label={t.progressLabel}>
           <div className="kr-progress__bar" style={{ width: `${pct}%` }} />
         </div>
-        <div className="kr-bar__row"><span className="kr-small">{t.progress(done, total)}</span>{LangSlider}</div>
+        <div className="kr-bar__row"><span className="kr-small">{t.progress(done, total)}</span>{langSlider}</div>
       </div>
 
       <p className="kr-eyebrow kr-kicker">{t.kicker}</p>

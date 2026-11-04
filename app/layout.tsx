@@ -15,10 +15,6 @@ const sans = Montserrat({
   variable: "--font-sans-loaded",
 });
 
-// Thème sombre selon le réglage du téléphone, appliqué avant l'affichage.
-const THEME_SCRIPT =
-  "try{document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){}";
-
 export const metadata: Metadata = {
   icons: { icon: [{ url: "/brand/icone-application.svg", type: "image/svg+xml" }] },
   title: "Keyroom",
@@ -26,6 +22,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  themeColor: "#0b1f33",
+  colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -33,10 +31,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      </head>
+    // Thème sombre sur tous les appareils (la langue de la page est ajustée côté navigateur par les questionnaires).
+    <html lang="fr" data-theme="dark" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );
