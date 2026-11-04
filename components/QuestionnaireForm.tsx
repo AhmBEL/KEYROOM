@@ -9,12 +9,13 @@ export type SubmitResult = { ok: boolean; message?: string; errors?: Record<stri
 export type SubmitMeta = { hp: string; elapsed: number };
 
 // Même formulaire pour l'espace connecté (français) et pour les liens publics (français ou anglais).
-export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, successNode }: {
+export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, successNode, header }: {
   role: Role;
   lang?: Lang;
   submit: (answers: Answers, meta: SubmitMeta) => Promise<SubmitResult>;
   submitLabel?: string;
   successNode?: React.ReactNode;
+  header?: React.ReactNode; // titre et introduction, retirés une fois la réponse envoyée
 }) {
   const router = useRouter();
   const t = UI[lang];
@@ -65,6 +66,8 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
   if (sent && successNode) return <>{successNode}</>;
 
   return (
+    <>
+    {header}
     <form onSubmit={onSubmit} noValidate lang={lang}>
       <div className="kr-progress" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label={t.progressLabel}>
         <div className="kr-progress__bar" style={{ width: `${pct}%` }} />
@@ -133,5 +136,6 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
         </button>
       </div>
     </form>
+    </>
   );
 }

@@ -26,10 +26,14 @@ export default async function PublicFormPage({ params, searchParams }: Props) {
   return (
     <main className="kr-page kr-page--has-sticky" lang={lang}>
       <div className="kr-topbar"><Logo width={160} /><LangSwitch lang={lang} path={`/formulaire/${type}`} /></div>
-      <h1 className="kr-title-2">{type === "mandat" ? t.formMandat : t.formInvest}</h1>
-      <p className="kr-body">{t.intro}</p>
-      <p className="kr-small kr-privacy">{t.privacy}</p>
       <QuestionnaireForm
+        header={
+          <>
+            <h1 className="kr-title-2">{type === "mandat" ? t.formMandat : t.formInvest}</h1>
+            <p className="kr-body">{t.intro}</p>
+            <p className="kr-small kr-privacy">{t.privacy}</p>
+          </>
+        }
         role={ROLE[type]}
         lang={lang}
         submit={submitPublicForm.bind(null, type, lang)}
