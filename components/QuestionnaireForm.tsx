@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { blocksFor, isVisible, progress, type Answers, type Question, type Role } from "@/lib/questionnaire";
 import { UI, tx, type Lang } from "@/lib/i18n";
 
-export type SubmitResult = { ok: boolean; message?: string; errors?: Record<string, string> };
+export type SubmitResult = { ok: boolean; message?: string; errors?: Record<string, string>; detail?: string };
 export type SubmitMeta = { hp: string; elapsed: number };
 
 // Même formulaire pour l'espace connecté (français) et pour les liens publics (français ou anglais).
@@ -23,6 +23,7 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
   const [hp, setHp] = useState("");
   const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
@@ -41,6 +42,7 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage(null);
+    setDetail(null);
     start(async () => {
       let res: SubmitResult;
       try {
@@ -54,6 +56,7 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
       }
       setErrors(res.errors ?? {});
       setMessage(res.message ?? t.fail);
+      setDetail(res.detail ?? null);
       const first = res.errors && Object.keys(res.errors)[0];
       if (first) document.getElementById(`q-${first}`)?.scrollIntoView({ block: "center" });
     });
@@ -123,6 +126,7 @@ export function QuestionnaireForm({ role, lang = "fr", submit, submitLabel, succ
       ))}
 
       {message && <p className="kr-error" role="alert">{message}</p>}
+      {message && detail && <p className="kr-hint">{t.techCode} {detail}</p>}
       <div className="kr-sticky">
         <button type="submit" className="kr-btn kr-btn--primary" disabled={pending}>
           {pending ? t.sending : submitLabel ?? t.submit}

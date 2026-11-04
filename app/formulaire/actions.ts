@@ -32,14 +32,28 @@ export async function submitPublicForm(form: string, langRaw: string, raw: Answe
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
   const ipHash = ip && key ? createHmac("sha256", key).update(ip).digest("hex").slice(0, 32) : null;
 
-  const admin = createAdminClient();
+  let admin: ReturnType<typeof createAdminClient>;
+  try {
+    admin = createAdminClient();
+  } catch {
+    console.error("[formulaire] clé serveur Supabase absente");
+    return { ok: false, message: t.fail, detail: "config" };
+  }
   if (ipHash) {
     const since = new Date(Date.now() - 3600_000).toISOString();
     const { count } = await admin.from("form_submissions").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", since);
     if ((count ?? 0) >= MAX_PER_HOUR) return { ok: false, message: t.limit };
   }
 
-  const { error } = await admin.from("form_submissions").insert({ form, lang, answers, ip_hash: ipHash });
-  if (error) return { ok: false, message: t.fail };
+  try {
+    const { error } = await admin.from("form_submissions").insert({ form, lang, answers, ip_hash: ipHash });
+    if (error) {
+      console.error("[formulaire] enregistrement refusé :", error.code, error.message);
+      return { ok: false, message: t.fail, detail: `db ${error.code || "?"}` };
+    }
+  } catch (e) {
+    console.error("[formulaire] enregistrement impossible :", e instanceof Error ? e.message : e);
+    return { ok: false, message: t.fail, detail: "réseau" };
+  }
   return { ok: true };
 }
