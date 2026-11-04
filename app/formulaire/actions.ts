@@ -2,7 +2,7 @@
 
 import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, KEY_INVALID } from "@/lib/supabase/admin";
 import { sanitizeAnswers, type Answers, type Role } from "@/lib/questionnaire";
 import { UI, isLang } from "@/lib/i18n";
 import type { SubmitMeta, SubmitResult } from "@/components/QuestionnaireForm";
@@ -35,9 +35,10 @@ export async function submitPublicForm(form: string, langRaw: string, raw: Answe
   let admin: ReturnType<typeof createAdminClient>;
   try {
     admin = createAdminClient();
-  } catch {
-    console.error("[formulaire] clé serveur Supabase absente");
-    return { ok: false, message: t.fail, detail: "config" };
+  } catch (e) {
+    const invalid = e instanceof Error && e.message === KEY_INVALID;
+    console.error(invalid ? "[formulaire] clé serveur Supabase invalide (caractères non valides)" : "[formulaire] clé serveur Supabase absente");
+    return { ok: false, message: t.fail, detail: invalid ? "clé invalide" : "config" };
   }
   if (ipHash) {
     const since = new Date(Date.now() - 3600_000).toISOString();
