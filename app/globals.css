@@ -331,3 +331,10 @@ body {
 .kr-done .kr-title-2 { color: var(--on-panel); margin: 0; }
 .kr-done .kr-body { color: var(--on-panel); margin: 0; }
 .kr-done__badge { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: #0b1f33; font-size: 28px; font-weight: 600; line-height: 1; }
+
+/* ---- Pages légales ---- */
+.kr-prose { margin-bottom: var(--space-5); }
+.kr-prose .kr-body { max-width: 65ch; }
+.kr-todo-mark { background: var(--accent); color: #0b1f33; padding: 0 var(--space-1); border-radius: var(--radius-sm); }
+.kr-legal-footer { margin-top: var(--space-7); padding-top: var(--space-4); border-top: 1px solid var(--line); font-size: 14px; line-height: 20px; }
+.kr-legal-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }

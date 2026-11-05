@@ -10,7 +10,8 @@
     "test:rls": "bash scripts/test-rls.sh",
     "check:secrets": "bash scripts/check-secrets.sh",
     "test:i18n": "tsx scripts/check-i18n.mts",
-    "test:form": "tsx scripts/check-form.mts"
+    "test:form": "tsx scripts/check-form.mts",
+    "test:legal": "tsx scripts/check-legal.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

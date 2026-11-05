@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const contact = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
 
@@ -18,6 +19,7 @@ export default function Home() {
           </a>
         )}
       </div>
+      <LegalFooter lang="fr" />
     </main>
   );
 }

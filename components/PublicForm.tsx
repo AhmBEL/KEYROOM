@@ -7,6 +7,7 @@ import {
 } from "@/lib/formdef";
 import { ProcessFlow } from "./ProcessFlow";
 import { LangSlider } from "./LangSlider";
+import { LegalFooter } from "./LegalFooter";
 import { useFormLang } from "./useFormLang";
 
 export type PublicResult = { ok: boolean; message?: string; errors?: Record<string, string>; detail?: string; validatedAt?: string };
@@ -109,6 +110,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
           <h2 id="done-title" className="kr-title-2">{t.doneTitle}</h2>
           <p className="kr-body">{t.doneText}</p>
         </section>
+        <LegalFooter lang={lang} />
       </div>
     );
   }
@@ -224,6 +226,7 @@ export function PublicForm({ role, initialLang, explicit, submit }: {
           <button type="submit" className="kr-btn kr-btn--primary" disabled={pending}>{pending ? t.sending : t.submit}</button>
         </div>
       </form>
+      <LegalFooter lang={lang} />
     </div>
   );
 }

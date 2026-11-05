@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { TXT, type Lang } from "@/lib/formdef";
 import { LangSlider } from "./LangSlider";
+import { LegalFooter } from "./LegalFooter";
 import { Logo } from "./Logo";
 import { useFormLang } from "./useFormLang";
 
@@ -20,6 +21,7 @@ export function FormIndex({ initialLang, explicit }: { initialLang: Lang; explic
         <Link className="kr-btn kr-btn--primary" href={`/formulaire/mandat?lang=${lang}`}>{t.pickMandat}</Link>
         <Link className="kr-btn kr-btn--outline" href={`/formulaire/investisseurs?lang=${lang}`}>{t.pickInvest}</Link>
       </div>
+      <LegalFooter lang={lang} />
     </main>
   );
 }
