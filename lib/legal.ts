@@ -12,6 +12,7 @@ export type LegalConfig = {
   databaseRegion: string;      // où est hébergée la base de données, ex. « Union européenne (Francfort) »
   governingLaw: string;        // droit applicable, ex. « le droit de la République de Maurice »
   updated: string;             // date de dernière mise à jour (AAAA-MM-JJ)
+  provisional: boolean;        // true : les champs vides affichent « communiqué prochainement » au lieu d'un repère à compléter
 };
 
 export const LEGAL: LegalConfig = {
@@ -24,10 +25,24 @@ export const LEGAL: LegalConfig = {
   databaseRegion: "",
   governingLaw: "",
   updated: "2026-11-05",
+  // Texte provisoire honnête (aucune identité inventée). Passer à false une fois tous les champs saisis.
+  provisional: true,
 };
 
-export const REQUIRED: (keyof LegalConfig)[] = ["editorName", "address", "email", "publicationDirector", "databaseRegion", "governingLaw"];
+type TextKey = Exclude<keyof LegalConfig, "provisional">;
+export const REQUIRED = ["editorName", "address", "email", "publicationDirector", "databaseRegion", "governingLaw"] as const satisfies readonly TextKey[];
 export const legalComplete = (c: LegalConfig = LEGAL) => REQUIRED.every((k) => c[k].trim() !== "");
+// Les liens vers la page sont publiés dès que le texte est complet ou provisoire ; l'indexation attend le texte complet.
+export const legalPublishable = (c: LegalConfig = LEGAL) => legalComplete(c) || c.provisional;
+
+const PROVISIONAL: Partial<Record<TextKey, L>> = {
+  editorName: { fr: "Keyroom (éditeur en cours de finalisation)", en: "Keyroom (publisher details being finalised)" },
+  address: { fr: "communiquée prochainement", en: "to be provided shortly" },
+  email: { fr: "communiquée prochainement", en: "to be provided shortly" },
+  publicationDirector: { fr: "communiqué prochainement", en: "to be provided shortly" },
+  databaseRegion: { fr: "précisée prochainement", en: "to be specified shortly" },
+  governingLaw: { fr: "le droit applicable, précisé prochainement", en: "the applicable law, to be specified shortly" },
+};
 
 const TODO: L = { fr: "[à compléter]", en: "[to be completed]" };
 export const TODO_RE = /(\[(?:à compléter|to be completed)\])/;
@@ -35,7 +50,11 @@ export const TODO_RE = /(\[(?:à compléter|to be completed)\])/;
 export type LegalSection = { id: string; title: L; paragraphs: L[] };
 
 export function legalSections(c: LegalConfig = LEGAL): LegalSection[] {
-  const v = (k: keyof LegalConfig): L => (c[k].trim() ? { fr: c[k].trim(), en: c[k].trim() } : TODO);
+  const v = (k: TextKey): L => {
+    const value = c[k].trim();
+    if (value) return { fr: value, en: value };
+    return (c.provisional && PROVISIONAL[k]) || TODO;
+  };
   const both = (fr: string, en: string): L => ({ fr, en });
   const j = (build: (lang: "fr" | "en") => string): L => ({ fr: build("fr"), en: build("en") });
 
