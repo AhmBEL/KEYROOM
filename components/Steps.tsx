@@ -13,7 +13,7 @@ export function Steps({ steps, showNote = true }: { steps: Step[]; showNote?: bo
             <p className="kr-step__title">{s.label}</p>
             <p className="kr-step__state">{STATE_LABEL[s.status]}</p>
             {showNote && s.status === "current" && (
-              <p className="kr-step__note">Votre action : {STEP_NOTE[s.position] ?? DEFAULT_STEP_NOTE}</p>
+              <p className="kr-step__note">{STEP_NOTE[s.position] ? `Votre action : ${STEP_NOTE[s.position]}` : DEFAULT_STEP_NOTE}</p>
             )}
           </div>
         </li>

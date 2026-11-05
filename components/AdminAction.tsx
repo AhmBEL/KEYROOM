@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ActionResult } from "@/app/admin/dossiers/actions";
+import { LoginLinkBox } from "./LoginLinkBox";
 
 export function AdminAction({ action, label, primary, confirm }: {
   action: () => Promise<ActionResult>; label: string; primary?: boolean; confirm?: string;
@@ -21,6 +22,7 @@ export function AdminAction({ action, label, primary, confirm }: {
         {pending ? "En cours…" : label}
       </button>
       {result && <p className={result.ok ? "kr-success" : "kr-error"} role={result.ok ? "status" : "alert"}>{result.ok ? "Terminé : " : ""}{result.message}</p>}
+      {result?.link && <LoginLinkBox path={result.link} />}
     </div>
   );
 }

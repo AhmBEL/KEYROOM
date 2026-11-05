@@ -2,8 +2,9 @@
 
 import { requireAdmin } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { makeLoginLink } from "@/lib/loginlink";
 
-export type InviteState = { ok: boolean; message: string } | null;
+export type InviteState = { ok: boolean; message: string; link?: string } | null;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -22,6 +23,8 @@ export async function inviteParty(_prev: InviteState, form: FormData): Promise<I
   const nom = String(form.get("nom") ?? "").trim();
   const role = String(form.get("role") ?? "") as PartyRole;
   const dealChoice = String(form.get("deal") ?? "new");
+  // Case décochée = test : le compte est créé sans envoyer d'email, et un lien de connexion est donné à l'admin.
+  const sendEmail = form.get("send_email") === "on";
 
   if (!EMAIL_RE.test(email) || email.length > 254) return fail("Cette adresse email n'est pas valide.");
   if (!prenom || prenom.length > 80 || !nom || nom.length > 80) return fail("Indiquez un prénom et un nom (80 caractères au plus).");
@@ -36,13 +39,16 @@ export async function inviteParty(_prev: InviteState, form: FormData): Promise<I
   }
 
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { prenom, nom },
-    redirectTo: site ? `${site}/connexion` : undefined,
-  });
-  if (inviteError || !invited.user) {
-    const exists = inviteError?.code === "email_exists" || /already/i.test(inviteError?.message ?? "");
-    return fail(exists ? "Cette adresse a déjà un compte." : "L'invitation n'a pas pu être envoyée. Vérifiez l'adresse et la configuration email, puis réessayez.");
+  const created = sendEmail
+    ? await admin.auth.admin.inviteUserByEmail(email, { data: { prenom, nom }, redirectTo: site ? `${site}/connexion` : undefined })
+    : await admin.auth.admin.createUser({ email, email_confirm: true, user_metadata: { prenom, nom } });
+  const invited = created.data;
+  const inviteError = created.error;
+  if (inviteError || !invited?.user) {
+    const exists = inviteError?.code === "email_exists" || /already|registered/i.test(inviteError?.message ?? "");
+    return fail(exists ? "Cette adresse a déjà un compte." : sendEmail
+      ? "L'invitation n'a pas pu être envoyée. Vérifiez l'adresse et la configuration email, puis réessayez."
+      : "Le compte n'a pas pu être créé. Vérifiez l'adresse, puis réessayez.");
   }
   const userId = invited.user.id;
   let createdDealId: string | null = null;
@@ -66,9 +72,13 @@ export async function inviteParty(_prev: InviteState, form: FormData): Promise<I
       deal_id: dealId,
       user_id: caller.id,
       action: "invitation",
-      details: { email, role },
+      details: { email, role, email_envoye: sendEmail },
     });
-    return { ok: true, message: `Invitation envoyée à ${email}.` };
+    if (sendEmail) return { ok: true, message: `Invitation envoyée à ${email}.` };
+    const link = await makeLoginLink(admin, email);
+    if ("error" in link) return { ok: true, message: `Compte créé pour ${email}, sans email. ${link.error} Utilisez « Générer un lien de connexion » dans le dossier.` };
+    await admin.from("audit_log").insert({ deal_id: dealId, user_id: caller.id, action: "lien_connexion_genere", details: { email } });
+    return { ok: true, message: `Compte créé pour ${email}, sans email envoyé. Transmettez-lui ce lien de connexion.`, link: link.path };
   } catch {
     // Retour arrière : aucun compte à moitié créé.
     if (createdDealId) await admin.from("deals").delete().eq("id", createdDealId);

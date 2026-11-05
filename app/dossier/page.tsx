@@ -91,8 +91,10 @@ export default async function DossierPage() {
       <h2 className="kr-title-3">Documents du dossier</h2>
       {docs.length ? docs.map((d) => <DocCard key={d.id} doc={d} mine={d.uploaded_by === user.id} />)
         : <p className="kr-body">Aucun document pour le moment.</p>}
-      {submitted && <Link className="kr-link" href="/dossier/questionnaire">Revoir mes réponses au questionnaire</Link>}
-      {hasDeposit || (current && current.position >= 2) ? <Link className="kr-link" href="/dossier/depot">Mes dépôts</Link> : null}
+      <div className="kr-links">
+        {submitted && <Link className="kr-link" href="/dossier/questionnaire">Revoir mes réponses au questionnaire</Link>}
+        {hasDeposit || (current && current.position >= 2) ? <Link className="kr-link" href="/dossier/depot">Mes dépôts</Link> : null}
+      </div>
 
       <div className="kr-footer-actions"><SignOutButton /></div>
     </main>

@@ -9,7 +9,7 @@ import { UploadForm } from "@/components/UploadForm";
 import { requireAdmin } from "@/lib/session";
 import { getDocuments, getSteps } from "@/lib/deal";
 import type { Answers } from "@/lib/questionnaire";
-import { advanceStep, generateAccord, setShared } from "../actions";
+import { advanceStep, generateAccord, generateLoginLink, setShared } from "../actions";
 import { SettingsForm } from "../SettingsForm";
 
 export const metadata = { title: "Dossier — Keyroom" };
@@ -49,7 +49,13 @@ export default async function AdminDealPage({ params }: { params: Promise<{ id: 
       <Logo width={160} />
       <Link href="/admin" className="kr-link">← Tous les dossiers</Link>
       <h1 className="kr-title-2">Dossier {deal.reference}</h1>
-      {(members ?? []).map((m) => <p key={m.user_id} className="kr-small">{ROLE_LABEL[m.role]} : {name.get(m.user_id)}</p>)}
+      {(members ?? []).map((m) => (
+        <div key={m.user_id}>
+          <p className="kr-small">{ROLE_LABEL[m.role]} : {name.get(m.user_id)}</p>
+          <AdminAction action={generateLoginLink.bind(null, id, m.user_id)} label="Générer un lien de connexion (test)"
+            confirm="Ce lien donne accès au compte de cette personne. Le générer ?" />
+        </div>
+      ))}
 
       <h2 className="kr-title-3">Process</h2>
       <Steps steps={steps} showNote={false} />

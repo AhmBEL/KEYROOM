@@ -338,3 +338,8 @@ body {
 .kr-todo-mark { background: var(--accent); color: #0b1f33; padding: 0 var(--space-1); border-radius: var(--radius-sm); }
 .kr-legal-footer { margin-top: var(--space-7); padding-top: var(--space-4); border-top: 1px solid var(--line); font-size: 14px; line-height: 20px; }
 .kr-legal-footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); }
+
+/* Lien de connexion (tests) */
+.kr-linkbox { display: grid; gap: var(--space-2); padding: var(--space-4); background: var(--surface-sand); border-radius: var(--radius-sm); }
+.kr-linkbox .kr-small { margin: 0; color: var(--text); }
+.kr-links { display: grid; gap: var(--space-1); margin-top: var(--space-3); justify-items: start; }

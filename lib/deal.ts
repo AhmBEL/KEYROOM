@@ -50,4 +50,5 @@ export const STEP_NOTE: Record<number, string> = {
   1: "Répondre au questionnaire, puis signer l'accord.",
   2: "Déposer votre teaser anonyme ou vos critères anonymes.",
 };
-export const DEFAULT_STEP_NOTE = "Nous vous contactons pour la suite.";
+// Étapes sans action de la part des parties : simple information, sans « Votre action ».
+export const DEFAULT_STEP_NOTE = "Nous reviendrons vers vous pour la suite.";

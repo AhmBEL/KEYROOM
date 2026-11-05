@@ -5,10 +5,11 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { advanceDeal } from "@/lib/advance";
+import { makeLoginLink } from "@/lib/loginlink";
 import { buildAccordPdf, type AccordSettings } from "@/lib/accord-pdf";
 import type { Answers } from "@/lib/questionnaire";
 
-export type ActionResult = { ok: boolean; message: string } | null;
+export type ActionResult = { ok: boolean; message: string; link?: string } | null;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const fail = (message: string): ActionResult => ({ ok: false, message });
 
@@ -100,4 +101,21 @@ export async function generateAccord(dealId: string): Promise<ActionResult> {
   revalidatePath(`/admin/dossiers/${dealId}`);
   revalidatePath("/dossier");
   return { ok: true, message: "Accord généré. Les trois parties peuvent l'ouvrir." };
+}
+
+// Lien de connexion pour une partie du dossier (tests ou dépannage). Jamais pour un compte administrateur.
+export async function generateLoginLink(dealId: string, userId: string): Promise<ActionResult> {
+  const { supabase, user } = await requireAdmin();
+  if (!UUID_RE.test(dealId) || !UUID_RE.test(userId)) return fail("Dossier ou personne inconnu.");
+  const { data: member } = await supabase.from("deal_members").select("role").eq("deal_id", dealId).eq("user_id", userId).maybeSingle();
+  if (!member) return fail("Cette personne ne fait pas partie du dossier.");
+
+  const admin = createAdminClient();
+  const { data: target } = await admin.auth.admin.getUserById(userId);
+  const email = target?.user?.email;
+  if (!email) return fail("Compte introuvable.");
+  const link = await makeLoginLink(admin, email);
+  if ("error" in link) return fail(link.error);
+  await admin.from("audit_log").insert({ deal_id: dealId, user_id: user.id, action: "lien_connexion_genere", details: { email } });
+  return { ok: true, message: `Lien de connexion créé pour ${email}.`, link: link.path };
 }
