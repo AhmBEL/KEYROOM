@@ -10,7 +10,7 @@ npm run build >/dev/null
 TMP=$(mktemp -d)
 cleanup() { [ -f "$TMP/fake.pid" ] && kill "$(cat "$TMP/fake.pid")" 2>/dev/null || true; [ -f "$TMP/next.pid" ] && kill "$(cat "$TMP/next.pid")" 2>/dev/null || true; rm -rf "$TMP"; }
 trap cleanup EXIT
-for t in invite-login dossier; do
+for t in invite-login dossier demo; do
   node scripts/e2e/fake-supabase.cjs >"$TMP/fake.log" 2>&1 & echo $! >"$TMP/fake.pid"
   npx next start -p 3111 >"$TMP/next.log" 2>&1 & echo $! >"$TMP/next.pid"
   sleep 5
