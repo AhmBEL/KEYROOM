@@ -23,7 +23,7 @@ export function ProjectView({ id }: { id: string }) {
   const me: Participant = pr.participants.find((p) => p.id === state.actor[id]) ?? pr.participants[0];
   const parties = pr.participants.filter(isParty);
   // Identités : l'administrateur et soi-même voient tout ; les autres voient « Partie A » jusqu'à la révélation.
-  const name = (p: Participant) => (me.isAdmin || p.id === me.id || pr.revealed.identities ? p.name : `Partie ${String.fromCharCode(65 + Math.max(0, parties.findIndex((x) => x.id === p.id)))} (${sideOf(p) === "sale" ? "côté vente" : "côté recherche"})`);
+  const name = (p: Participant) => (me.isAdmin || p.id === me.id || pr.revealed.identities ? p.name : !isParty(p) ? (p.isAdmin ? "Administrateur" : "Conseil") : `Partie ${String.fromCharCode(65 + Math.max(0, parties.findIndex((x) => x.id === p.id)))} (${sideOf(p) === "sale" ? "côté vente" : "côté recherche"})`);
 
   const owner = me.isAdmin ? parties.some((p) => sideOf(p) === "sale") : sideOf(me) === "sale";
   const tabs: [Tab, string][] = me.isAdmin

@@ -19,7 +19,7 @@ export function MandatePanel({ pr, me }: { pr: Project; me: Participant }) {
 
   const setMandate = (ownerId: string, m: Participant["mandate"], text: string) =>
     mutate(pr.id, (p) => ({ ...p, participants: p.participants.map((x) => (x.id === ownerId ? { ...x, mandate: m } : x)) }), { who: me.name, text });
-  const preview = async (o: Participant) => openPdf(await buildMandatePdf(pr, o, admin, o.mandate?.signedBy ? { by: o.mandate.signedBy, at: o.mandate.signedAt ?? new Date().toISOString() } : undefined));
+  const preview = async (o: Participant) => openPdf(await buildMandatePdf(pr, o, admin, o.mandate?.signedBy ? { by: o.mandate.signedBy, at: o.mandate.signedAt ?? new Date().toISOString(), image: o.mandate.signatureImg } : undefined));
 
   if (!pr.options.mandate) return <div className="kr-banner"><p>La génération du mandat n'est pas activée pour ce projet.</p></div>;
   if (!owners.length) return <div className="kr-banner"><p>Aucune partie « vente » dans ce projet : le mandat de vente est généré pour la partie vente.</p></div>;

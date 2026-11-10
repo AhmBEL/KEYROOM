@@ -170,7 +170,7 @@ const base = 'http://localhost:3111';
   await p.getByRole('heading', { name: 'Récapitulatif' }).waitFor();
   await p.getByRole('button', { name: 'Envoyer les invitations' }).click();
   await p.getByRole('heading', { name: 'Villa à Bordeaux' }).waitFor();
-  assert.ok(await p.getByText(/2 participants|Paul Vendeur/).first().isVisible());
+  await p.getByText(/2 participants n'ont pas encore accepté le processus/).waitFor();
   await p.getByRole('tab', { name: 'Journal' }).click();
   await p.getByText(/Invitation envoyée à Paul Vendeur/).waitFor();
   // un invité accepte le processus (état « à accepter » au départ)

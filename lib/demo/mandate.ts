@@ -2,7 +2,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import type { Participant, Project } from "./types";
 
 // Mandat généré dans le navigateur à partir des réponses. Document de démonstration, sans valeur juridique.
-export async function buildMandatePdf(pr: Project, owner: Participant, agent: Participant, signature?: { by: string; at: string }) {
+export async function buildMandatePdf(pr: Project, owner: Participant, agent: Participant, signature?: { by: string; at: string; image?: string }) {
   const pdf = await PDFDocument.create();
   const serif = await pdf.embedFont(StandardFonts.TimesRoman), bold = await pdf.embedFont(StandardFonts.TimesRomanBold), sans = await pdf.embedFont(StandardFonts.Helvetica);
   const page = pdf.addPage([595.28, 841.89]); const M = 56; const W = 595.28 - 2 * M; let y = 841.89 - M;
@@ -39,7 +39,14 @@ export async function buildMandatePdf(pr: Project, owner: Participant, agent: Pa
   page.drawText("Le mandant", { x: M, y: y - 11, size: 11, font: bold, color: INK });
   page.drawText("Le mandataire", { x: M + W / 2, y: y - 11, size: 11, font: bold, color: INK });
   if (signature) {
-    page.drawText(signature.by, { x: M, y: y - 38, size: 16, font: serif, color: INK });
+    let drawn = false;
+    if (signature.image?.startsWith("data:image/png")) {
+      try {
+        const img = await pdf.embedPng(signature.image); const h = 40; const w = Math.min(160, (img.width / img.height) * h);
+        page.drawImage(img, { x: M, y: y - 52, width: w, height: h }); drawn = true;
+      } catch { /* retombe sur la signature tapée */ }
+    }
+    if (!drawn) page.drawText(signature.by, { x: M, y: y - 38, size: 16, font: serif, color: INK });
     page.drawText(`Signé électroniquement (simulation) le ${new Date(signature.at).toLocaleString("fr-FR")}`, { x: M, y: y - 54, size: 8, font: sans, color: MUTED });
   }
   page.drawLine({ start: { x: M, y: y - 62 }, end: { x: M + W / 2 - 20, y: y - 62 }, thickness: 0.6, color: MUTED });

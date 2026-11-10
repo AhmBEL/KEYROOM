@@ -18,7 +18,8 @@ export type Participant = {
   docs: Record<string, DocFile>;
   signed: Record<string, string>;      // identifiant d'étape -> date de signature
   approved: Record<string, boolean>;   // identifiant d'étape -> accord de révélation
-  mandate?: { status: "draft" | "validated" | "signed" | "sent"; signedBy?: string; signedAt?: string; sentAt?: string };
+  signature?: string;                  // signature dessinée (image), réutilisée pour les accords et le mandat
+  mandate?: { status: "draft" | "validated" | "signed" | "sent"; signedBy?: string; signedAt?: string; sentAt?: string; signatureImg?: string };
 };
 
 export type Step = {
